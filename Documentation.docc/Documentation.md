@@ -1,6 +1,6 @@
 # GeoRocksIOS
 
-![GeoRocksIOS Logo](logo.png)
+![GeoRocksIOS Logo](Resources/logo.png)
 
 GeoRocksIOS is a sophisticated iOS application designed to provide users with an interactive and informative experience about various rocks. Leveraging **SwiftUI** for a seamless user interface and **Firebase** for robust authentication, GeoRocksIOS offers features such as user authentication, detailed rock information, multimedia integration, and interactive maps.
 
