@@ -25,60 +25,84 @@ struct LoginView: View {
 
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // The title "GeoRocks iOS" is displayed with a large font
-                Text("GeoRocks iOS")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+            ZStack {
+                // Background Color
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
                 
-                // An email input field is provided for the user
-                TextField("Email", text: $email)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
-                    .autocapitalization(.none) // Automatic capitalization is disabled
-                    .disableAutocorrection(true) // Automatic correction is disabled
-                    .keyboardType(.emailAddress)
-                
-                // A password input field is provided for the user
-                SecureField("Password", text: $password)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
-                
-                // A button labeled "Sign In" is provided to initiate the sign-in process
-                Button(action: {
-                    signIn()
-                }) {
-                    if isLoading {
-                        ProgressView()
-                            .progressViewStyle(CircularProgressViewStyle())
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        Text("Sign In")
-                            .fontWeight(.semibold) // The text is given a semi-bold font weight
-                            .frame(maxWidth: .infinity) // The button expands to the maximum available width
-                            .padding() // Padding is added around the text
-                            .background(Color.blue.cornerRadius(8)) // A blue background with rounded corners is applied
-                            .foregroundColor(.white) // The text color is set to white
+                VStack(spacing: 30) {
+                    // AppIcon Image
+                    Image("AppIcon") // Ensure "AppIcon" is the name of your logo in Assets.xcassets
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 150, height: 150)
+                        .padding(.top, 50)
+                    
+                    // The title "GeoRocks iOS" is displayed with a large font
+                    Text("GeoRocks iOS")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("DefaultTextColor")) // Custom color
+                    
+                    VStack(spacing: 15) {
+                        // An email input field is provided for the user
+                        TextField("Email", text: $email)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                            .autocapitalization(.none) // Automatic capitalization is disabled
+                            .disableAutocorrection(true) // Automatic correction is disabled
+                            .keyboardType(.emailAddress)
+                            .padding(.horizontal, 20)
+                            .background(Color("DefaultBackground"))
+                            .cornerRadius(8)
+                        
+                        // A password input field is provided for the user
+                        SecureField("Password", text: $password)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                            .padding(.horizontal, 20)
+                            .background(Color("DefaultBackground"))
+                            .cornerRadius(8)
                     }
+                    
+                    // A button labeled "Sign In" is provided to initiate the sign-in process
+                    Button(action: {
+                        signIn()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color.white))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Sign In")
+                                .fontWeight(.semibold) // The text is given a semi-bold font weight
+                                .frame(maxWidth: .infinity) // The button expands to the maximum available width
+                                .padding()
+                                .background(Color("ButtonDefault")) // Custom button color
+                                .foregroundColor(.white) // The text color is set to white
+                                .cornerRadius(8) // Rounded corners
+                        }
+                    }
+                    .disabled(isLoading)
+                    .buttonStyle(CustomButtonStyle()) // Apply custom button style
+                    
+                    // NavigationLink to CreateAccountView
+                    NavigationLink(destination: CreateAccountView()) {
+                        Text("Create Account")
+                            .fontWeight(.semibold) // The text is given a semi-bold font weight
+                            .foregroundColor(Color("ButtonDefault")) // Custom color matching button
+                    }
+                    
+                    // NavigationLink to ForgotPasswordView
+                    NavigationLink(destination: ForgotPasswordView()) {
+                        Text("Forgot your password?")
+                            .foregroundColor(Color("ButtonDefault")) // The text color is set to custom color
+                            .underline() // The text is underlined
+                    }
+                    
+                    Spacer() // A spacer is added to push the content upwards
                 }
-                .disabled(isLoading)
-                
-                // NavigationLink to CreateAccountView
-                NavigationLink(destination: CreateAccountView()) {
-                    Text("Create Account")
-                        .fontWeight(.semibold) // The text is given a semi-bold font weight
-                        .foregroundColor(.blue) // The text color is set to blue
-                }
-                
-                // NavigationLink to ForgotPasswordView
-                NavigationLink(destination: ForgotPasswordView()) {
-                    Text("Forgot your password?")
-                        .foregroundColor(.blue) // The text color is set to blue
-                        .underline() // The text is underlined
-                }
-                
-                Spacer() // A spacer is added to push the content upwards
+                .padding(.horizontal, 32) // Horizontal padding is applied to the entire VStack
             }
-            .padding(.horizontal, 32) // Horizontal padding is applied to the entire VStack
             .navigationBarHidden(true) // The navigation bar is hidden for this view
             .navigationBarTitle("") // The navigation bar title is set to an empty string
             // Observe changes in AuthViewModel's errorMessage and successMessage
@@ -139,12 +163,26 @@ struct LoginView: View {
             isLoading = false
         }
     }
-}
+    
+    // MARK: - Custom Button Style
+    struct CustomButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .background(
+                    configuration.isPressed ?
+                    Color("ButtonPressed") :
+                    Color("ButtonDefault")
+                )
+                .cornerRadius(8)
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+        }
+    }
 
-struct LoginView_Previews: PreviewProvider {
-    static var previews: some View {
-        // A preview of the LoginView is provided with an instance of AuthViewModel
-        LoginView()
-            .environmentObject(AuthViewModel())
+    struct LoginView_Previews: PreviewProvider {
+        static var previews: some View {
+            // A preview of the LoginView is provided with an instance of AuthViewModel
+            LoginView()
+                .environmentObject(AuthViewModel())
+        }
     }
 }
