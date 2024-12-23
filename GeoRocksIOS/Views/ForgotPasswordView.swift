@@ -5,7 +5,6 @@
 //  Created by Carlos Ignacio Padilla Herrera on 23/12/24.
 //
 
-
 import SwiftUI
 
 struct ForgotPasswordView: View {
@@ -22,42 +21,59 @@ struct ForgotPasswordView: View {
     @State private var isLoading: Bool = false
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Reset Password")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-            
-            // Email Input
-            TextField("Enter your email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .autocapitalization(.none)
-                .disableAutocorrection(true)
-                .keyboardType(.emailAddress)
-            
-            // Reset Password Button
-            Button(action: {
-                resetPassword()
-            }) {
-                if isLoading {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle())
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                } else {
-                    Text("Send Reset Link")
-                        .fontWeight(.semibold)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.orange)
-                        .foregroundColor(.white)
+        ScrollView {
+            VStack(spacing: 20) {
+                // AppIcon Image
+                Image("logo") // Ensure "logo" matches the image name in Assets.xcassets/AppIcon.appiconset
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .padding(.top, 50)
+                
+                Text("Reset Password")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("DefaultTextColor"))
+                
+                VStack(spacing: 15) {
+                    // Email Input
+                    TextField("Enter your email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                        .padding(.horizontal, 20)
+                        .background(Color("DefaultBackground"))
                         .cornerRadius(8)
                 }
+                
+                // Reset Password Button
+                Button(action: {
+                    resetPassword()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Send Reset Link")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color("ButtonDefault"))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(isLoading)
+                .buttonStyle(CustomButtonStyle())
+                
+                Spacer()
             }
-            .disabled(isLoading)
-            
-            Spacer()
+            .padding(.horizontal, 32)
         }
-        .padding(.horizontal, 32)
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
         .navigationBarTitle("Reset Password", displayMode: .inline)
         // Observe changes in AuthViewModel's errorMessage and successMessage
         .onReceive(authViewModel.$errorMessage) { error in
@@ -114,6 +130,20 @@ struct ForgotPasswordView: View {
         // Reset loading state after a delay to allow AuthViewModel to process
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             isLoading = false
+        }
+    }
+    
+    // MARK: - Custom Button Style
+    struct CustomButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .background(
+                    configuration.isPressed ?
+                    Color("ButtonPressed") :
+                    Color("ButtonDefault")
+                )
+                .cornerRadius(8)
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
         }
     }
 }

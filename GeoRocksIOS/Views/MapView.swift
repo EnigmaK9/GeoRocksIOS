@@ -25,5 +25,17 @@ struct MapView: View {
     
     var body: some View {
         Map(coordinateRegion: $region)
+            .overlay(
+                // Marker for the rock's location
+                Circle()
+                    .stroke(Color("ButtonDefault"), lineWidth: 2)
+                    .frame(width: 30, height: 30)
+            )
+    }
+}
+
+struct MapView_Previews: PreviewProvider {
+    static var previews: some View {
+        MapView(lat: 37.7749, lon: -122.4194)
     }
 }

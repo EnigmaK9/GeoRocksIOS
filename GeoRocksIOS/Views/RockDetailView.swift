@@ -20,7 +20,7 @@ struct RockDetailView: View {
             VStack(spacing: 16) {
                 if detailViewModel.isLoading {
                     // A loading indicator is displayed while data is being fetched
-                    ProgressView("Loading rock detail...")
+                    ProgressView("Loading rock details...")
                         .progressViewStyle(CircularProgressViewStyle())
                         .scaleEffect(1.5)
                 } else if let error = detailViewModel.error {
@@ -60,6 +60,7 @@ struct RockDetailView: View {
                         .fontWeight(.bold)
                         .padding(.top, 8)
                         .multilineTextAlignment(.center)
+                        .foregroundColor(Color("DefaultTextColor"))
                     
                     // Basic information is displayed
                     VStack(alignment: .leading, spacing: 8) {
@@ -69,6 +70,7 @@ struct RockDetailView: View {
                         Text("Magnetic: \(detail.magnetic == true ? "Yes" : "No")")
                     }
                     .padding(.horizontal)
+                    .foregroundColor(Color("DefaultTextColor"))
                     
                     // Video is displayed if available
                     if let videoURLString = detail.video,
@@ -91,6 +93,7 @@ struct RockDetailView: View {
                     if let description = detail.longDesc {
                         Text(description)
                             .padding(.horizontal)
+                            .foregroundColor(Color("DefaultTextColor"))
                     }
                     
                     // Frequently Asked Questions are displayed
@@ -99,10 +102,12 @@ struct RockDetailView: View {
                             Text("Frequently Asked Questions:")
                                 .font(.headline)
                                 .padding(.top, 16)
+                                .foregroundColor(Color("DefaultTextColor"))
                             
                             ForEach(faqs, id: \.self) { faq in
                                 Text("• \(faq)")
                                     .font(.subheadline)
+                                    .foregroundColor(Color("DefaultTextColor"))
                             }
                         }
                         .padding(.horizontal)

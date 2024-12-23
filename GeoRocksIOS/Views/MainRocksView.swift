@@ -12,35 +12,44 @@ struct MainRocksView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 20) {
-                // Welcome Text
-                Text("Welcome to Rocks!")
-                    .font(.title)
-                    .padding()
+            ZStack {
+                // Background Color
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
                 
-                // Button to navigate to the rocks list
-                NavigationLink(destination: RocksListView()) {
-                    Text("View All Rocks")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.white)
+                VStack(spacing: 20) {
+                    // Welcome Text
+                    Text("Welcome to Rocks!")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("DefaultTextColor"))
                         .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                    
+                    // Button to navigate to the rocks list
+                    NavigationLink(destination: RocksListView()) {
+                        Text("View All Rocks")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.white)
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color("ButtonDefault"))
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
+                    
+                    Spacer()
+                    
+                    // Sign Out Button
+                    Button(action: {
+                        authViewModel.signOut()
+                    }) {
+                        Text("Logout")
+                            .fontWeight(.semibold)
+                            .foregroundColor(.red)
+                            .padding()
+                    }
+                    .padding(.bottom, 40)
                 }
-                .padding(.horizontal)
-                
-                Spacer()
-                
-                // Sign Out Button
-                Button(action: {
-                    authViewModel.signOut()
-                }) {
-                    Text("Logout")
-                        .fontWeight(.semibold)
-                        .foregroundColor(.red)
-                }
-                .padding(.bottom, 40)
             }
             .navigationTitle("Rocks List")
         }
