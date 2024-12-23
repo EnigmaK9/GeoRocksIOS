@@ -1,51 +1,56 @@
-//
-//  RockDetailViewModel.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
+import Foundation
 
-import SwiftUI
-
-/**
- RockDetailViewModel handles fetching the detailed information of a single rock.
- 
- - The `rockDetail` published property triggers UI updates in RockDetailView.
- */
 class RockDetailViewModel: ObservableObject {
-    
     @Published var rockDetail: RockDetailDto?
-    
-    /**
-     Fetches the detail for a specific rock by its ID.
-     
-     - Parameter rockId: The unique identifier for the rock.
-     */
+    @Published var isLoading: Bool = false
+    @Published var error: String?
+
     func fetchRockDetail(rockId: String) {
-        let urlString = "https://api.backend.com/rocks/rock_detail/\(rockId)"
+        // Asegúrate de usar la URL correcta
+        let urlString = "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_detail/\(rockId)"
         
         guard let url = URL(string: urlString) else {
-            print("Invalid rock detail URL: \(urlString)")
+            DispatchQueue.main.async {
+                self.error = "URL inválida: \(urlString)"
+            }
+            print("URL inválida: \(urlString)")
             return
         }
         
+        self.isLoading = true
+        self.error = nil
+        
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+            }
+            
             if let error = error {
+                DispatchQueue.main.async {
+                    self?.error = "Error de red: \(error.localizedDescription)"
+                }
                 print("Error fetching rock detail: \(error.localizedDescription)")
                 return
             }
             
             guard let data = data else {
+                DispatchQueue.main.async {
+                    self?.error = "No se recibieron datos."
+                }
                 print("No data returned for rock detail.")
                 return
             }
             
             do {
-                let decoded = try JSONDecoder().decode(RockDetailDto.self, from: data)
+                let decoder = JSONDecoder()
+                let decoded = try decoder.decode(RockDetailDto.self, from: data)
                 DispatchQueue.main.async {
                     self?.rockDetail = decoded
                 }
             } catch {
+                DispatchQueue.main.async {
+                    self?.error = "Error al decodificar datos: \(error.localizedDescription)"
+                }
                 print("Error decoding rock detail: \(error.localizedDescription)")
             }
         }.resume()
