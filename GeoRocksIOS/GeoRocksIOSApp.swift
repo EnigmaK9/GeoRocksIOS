@@ -10,23 +10,30 @@ import Firebase
 
 @main
 struct GeoRocksIOSApp: App {
-    // Create and own an AuthViewModel instance
+    // Create and own an instance of AuthViewModel
     @StateObject var authViewModel = AuthViewModel()
 
     init() {
-        // Initialize Firebase here
+        // Check for the presence of the plist (optional, for debugging)
+        if let path = Bundle.main.path(forResource: "GoogleService-Info", ofType: "plist") {
+            print("GoogleService-Info.plist found at: \(path)")
+        } else {
+            print("GoogleService-Info.plist not found in the bundle.")
+        }
+        
+        // Initialize Firebase
         FirebaseApp.configure()
     }
 
     var body: some Scene {
         WindowGroup {
-            // Check if user is logged in
+            // Check if the user is authenticated
             if authViewModel.isLoggedIn {
-                // Show MainRocksView (or any screen for logged-in users)
+                // Show MainRocksView for authenticated users
                 MainRocksView()
                     .environmentObject(authViewModel)
             } else {
-                // Otherwise, display LoginView
+                // Show LoginView for unauthenticated users
                 NavigationView {
                     LoginView()
                 }

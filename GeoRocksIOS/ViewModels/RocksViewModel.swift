@@ -5,37 +5,31 @@
 //  Created by Carlos Padilla on 12/12/2024.
 //
 
-// RocksViewModel.swift
 import SwiftUI
+import Combine
 
 class RocksViewModel: ObservableObject {
     @Published var rocks: [RockDto] = []
+    @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
+    
+    private var cancellables = Set<AnyCancellable>()
     
     func fetchRocks() {
-        guard let url = URL(string: "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_list") else {
-            print("Invalid URL")
-            return
-        }
+        isLoading = true
+        errorMessage = nil
         
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            if let error = error {
-                print("Error fetching rock list: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let data = data else {
-                print("No data returned for rock list.")
-                return
-            }
-            
-            do {
-                let decoded = try JSONDecoder().decode([RockDto].self, from: data)
-                DispatchQueue.main.async {
-                    self?.rocks = decoded
+        NetworkingService.shared.fetchRockList { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                switch result {
+                case .success(let rocks):
+                    self?.rocks = rocks
+                case .failure(let error):
+                    self?.errorMessage = error.localizedDescription
+                    print("Error fetching rocks: \(error.localizedDescription)")
                 }
-            } catch {
-                print("Error decoding rock list: \(error.localizedDescription)")
             }
-        }.resume()
+        }
     }
 }
