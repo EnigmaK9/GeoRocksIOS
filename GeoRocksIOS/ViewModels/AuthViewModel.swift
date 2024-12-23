@@ -12,6 +12,10 @@ class AuthViewModel: ObservableObject {
     // A published property to track the user's login status
     @Published var isLoggedIn = false
     
+    // Published properties for error and success messages
+    @Published var errorMessage: String?
+    @Published var successMessage: String?
+    
     // Listener handle to manage the authentication state listener
     private var authListenerHandle: AuthStateDidChangeListenerHandle?
     
@@ -41,7 +45,8 @@ class AuthViewModel: ObservableObject {
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
             DispatchQueue.main.async {
                 if let error = error {
-                    // An error message is printed if the sign-in fails
+                    // Set the error message to be displayed
+                    self?.errorMessage = error.localizedDescription
                     print("Error signing in: \(error.localizedDescription)")
                 } else {
                     // If the sign-in is successful, the login status is marked as true
@@ -57,11 +62,14 @@ class AuthViewModel: ObservableObject {
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] _, error in
             DispatchQueue.main.async {
                 if let error = error {
-                    // An error message is printed if the registration fails
+                    // Set the error message to be displayed
+                    self?.errorMessage = error.localizedDescription
                     print("Error registering: \(error.localizedDescription)")
                 } else {
                     // If the registration is successful, the login status is marked as true
                     self?.isLoggedIn = true
+                    // Optionally, set a success message
+                    self?.successMessage = "Account created successfully!"
                 }
             }
         }
@@ -70,13 +78,17 @@ class AuthViewModel: ObservableObject {
     // MARK: - Reset Password
     func resetPassword(email: String) {
         // A password reset email is sent to the provided email address
-        Auth.auth().sendPasswordReset(withEmail: email) { error in
-            if let error = error {
-                // An error message is printed if the password reset fails
-                print("Error sending password reset: \(error.localizedDescription)")
-            } else {
-                // A confirmation message is printed if the password reset email is sent successfully
-                print("Password reset email sent to \(email)")
+        Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    // Set the error message to be displayed
+                    self?.errorMessage = error.localizedDescription
+                    print("Error sending password reset: \(error.localizedDescription)")
+                } else {
+                    // Set a success message to inform the user
+                    self?.successMessage = "Password reset email sent to \(email)."
+                    print("Password reset email sent to \(email)")
+                }
             }
         }
     }
@@ -89,8 +101,15 @@ class AuthViewModel: ObservableObject {
             // If the sign-out is successful, the login status is marked as false
             self.isLoggedIn = false
         } catch {
-            // An error message is printed if the sign-out fails
+            // Set the error message to be displayed
+            self.errorMessage = error.localizedDescription
             print("Error signing out: \(error.localizedDescription)")
         }
+    }
+    
+    // MARK: - Clear Messages
+    func clearMessages() {
+        errorMessage = nil
+        successMessage = nil
     }
 }

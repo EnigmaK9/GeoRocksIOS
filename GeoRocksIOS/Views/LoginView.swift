@@ -10,65 +10,134 @@ import SwiftUI
 struct LoginView: View {
     // The AuthViewModel is accessed from the environment
     @EnvironmentObject var authViewModel: AuthViewModel
-    
+
     // State variables are used to store the user's email and password input
     @State private var email: String = ""
     @State private var password: String = ""
     
+    // State variables for controlling alerts
+    @State private var showErrorAlert: Bool = false
+    @State private var showSuccessAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // State variable to manage loading state
+    @State private var isLoading: Bool = false
+
     var body: some View {
-        VStack(spacing: 20) {
-            // The title "GeoRocks iOS" is displayed with a large font
-            Text("GeoRocks iOS")
-                .font(.largeTitle)
-            
-            // An email input field is provided for the user
-            TextField("Email", text: $email)
-                .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
-                .autocapitalization(.none) // Automatic capitalization is disabled
-                .disableAutocorrection(true) // Automatic correction is disabled
-            
-            // A password input field is provided for the user
-            SecureField("Password", text: $password)
-                .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
-            
-            // A button labeled "Sign In" is provided to initiate the sign-in process
-            Button(action: {
-                // The signIn function is called with the provided email and password
-                authViewModel.signIn(email: email, password: password)
-            }) {
-                Text("Sign In")
-                    .fontWeight(.semibold) // The text is given a semi-bold font weight
-                    .frame(maxWidth: .infinity) // The button expands to the maximum available width
-                    .padding() // Padding is added around the text
-                    .background(Color.blue.cornerRadius(8)) // A blue background with rounded corners is applied
-                    .foregroundColor(.white) // The text color is set to white
+        NavigationView {
+            VStack(spacing: 20) {
+                // The title "GeoRocks iOS" is displayed with a large font
+                Text("GeoRocks iOS")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                // An email input field is provided for the user
+                TextField("Email", text: $email)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                    .autocapitalization(.none) // Automatic capitalization is disabled
+                    .disableAutocorrection(true) // Automatic correction is disabled
+                    .keyboardType(.emailAddress)
+                
+                // A password input field is provided for the user
+                SecureField("Password", text: $password)
+                    .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                
+                // A button labeled "Sign In" is provided to initiate the sign-in process
+                Button(action: {
+                    signIn()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Sign In")
+                            .fontWeight(.semibold) // The text is given a semi-bold font weight
+                            .frame(maxWidth: .infinity) // The button expands to the maximum available width
+                            .padding() // Padding is added around the text
+                            .background(Color.blue.cornerRadius(8)) // A blue background with rounded corners is applied
+                            .foregroundColor(.white) // The text color is set to white
+                    }
+                }
+                .disabled(isLoading)
+                
+                // NavigationLink to CreateAccountView
+                NavigationLink(destination: CreateAccountView()) {
+                    Text("Create Account")
+                        .fontWeight(.semibold) // The text is given a semi-bold font weight
+                        .foregroundColor(.blue) // The text color is set to blue
+                }
+                
+                // NavigationLink to ForgotPasswordView
+                NavigationLink(destination: ForgotPasswordView()) {
+                    Text("Forgot your password?")
+                        .foregroundColor(.blue) // The text color is set to blue
+                        .underline() // The text is underlined
+                }
+                
+                Spacer() // A spacer is added to push the content upwards
             }
-            
-            // A button labeled "Create Account" is provided to initiate the registration process
-            Button(action: {
-                // The register function is called with the provided email and password
-                authViewModel.register(email: email, password: password)
-            }) {
-                Text("Create Account")
-                    .fontWeight(.semibold) // The text is given a semi-bold font weight
-                    .foregroundColor(.blue) // The text color is set to blue
+            .padding(.horizontal, 32) // Horizontal padding is applied to the entire VStack
+            .navigationBarHidden(true) // The navigation bar is hidden for this view
+            .navigationBarTitle("") // The navigation bar title is set to an empty string
+            // Observe changes in AuthViewModel's errorMessage and successMessage
+            .onReceive(authViewModel.$errorMessage) { error in
+                if let error = error {
+                    alertMessage = error
+                    showErrorAlert = true
+                }
             }
-            
-            // A button labeled "Forgot your password?" is provided to initiate the password reset process
-            Button(action: {
-                // The resetPassword function is called with the provided email
-                authViewModel.resetPassword(email: email)
-            }) {
-                Text("Forgot your password?")
-                    .foregroundColor(.blue) // The text color is set to blue
-                    .underline() // The text is underlined
+            .onReceive(authViewModel.$successMessage) { success in
+                if let success = success {
+                    alertMessage = success
+                    showSuccessAlert = true
+                }
             }
-            
-            Spacer() // A spacer is added to push the content upwards
+            // Present error alert
+            .alert(isPresented: $showErrorAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        authViewModel.clearMessages()
+                    }
+                )
+            }
+            // Present success alert
+            .alert(isPresented: $showSuccessAlert) {
+                Alert(
+                    title: Text("Success"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        authViewModel.clearMessages()
+                    }
+                )
+            }
         }
-        .padding(.horizontal, 32) // Horizontal padding is applied to the entire VStack
-        .navigationBarHidden(true) // The navigation bar is hidden for this view
-        .navigationBarTitle("") // The navigation bar title is set to an empty string
+    }
+    
+    // MARK: - Sign In Function
+    private func signIn() {
+        // Input Validation
+        guard !email.isEmpty, !password.isEmpty else {
+            alertMessage = "Please enter both email and password."
+            showErrorAlert = true
+            return
+        }
+        
+        // Optionally, add more validation (e.g., email format)
+        
+        // Set loading state
+        isLoading = true
+        
+        // Call AuthViewModel's signIn function
+        authViewModel.signIn(email: email, password: password)
+        
+        // Reset loading state after a delay to allow AuthViewModel to process
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isLoading = false
+        }
     }
 }
 

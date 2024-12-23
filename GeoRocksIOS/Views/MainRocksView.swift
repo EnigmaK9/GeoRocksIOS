@@ -5,8 +5,6 @@
 //  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
 //
 
-// MainRocksView.swift
-
 import SwiftUI
 
 struct MainRocksView: View {
@@ -15,12 +13,12 @@ struct MainRocksView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                // Texto de bienvenida
+                // Welcome Text
                 Text("Welcome to Rocks!")
                     .font(.title)
                     .padding()
                 
-                // Botón para navegar a la lista de rocas
+                // Button to navigate to the rocks list
                 NavigationLink(destination: RocksListView()) {
                     Text("View All Rocks")
                         .fontWeight(.semibold)
@@ -34,7 +32,7 @@ struct MainRocksView: View {
                 
                 Spacer()
                 
-                // Botón de Sign Out
+                // Sign Out Button
                 Button(action: {
                     authViewModel.signOut()
                 }) {
