@@ -18,14 +18,17 @@ struct LoginView: View {
             Text("GeoRocks iOS")
                 .font(.largeTitle)
             
+            // Email TextField
             TextField("Email", text: $email)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .autocapitalization(.none)
                 .disableAutocorrection(true)
             
+            // Password SecureField
             SecureField("Password", text: $password)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
             
+            // Sign In Button
             Button(action: {
                 authViewModel.signIn(email: email, password: password)
             }) {
@@ -37,6 +40,7 @@ struct LoginView: View {
                     .foregroundColor(.white)
             }
             
+            // Create Account Button
             Button(action: {
                 authViewModel.register(email: email, password: password)
             }) {
@@ -45,6 +49,7 @@ struct LoginView: View {
                     .foregroundColor(.blue)
             }
             
+            // Forgot Password
             Button(action: {
                 authViewModel.resetPassword(email: email)
             }) {

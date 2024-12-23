@@ -10,28 +10,36 @@ import FirebaseAuth
 
 class AuthViewModel: ObservableObject {
     @Published var isLoggedIn = false
-    
+
     init() {
-        // Check if a user is already signed in at app launch
+        // Check if a user is already signed in at launch
         self.isLoggedIn = Auth.auth().currentUser != nil
+
+        // Listen for authentication state changes
+        Auth.auth().addStateDidChangeListener { [weak self] _, user in
+            DispatchQueue.main.async {
+                self?.isLoggedIn = user != nil
+            }
+        }
     }
-    
-    // MARK: - Sign In
+
+    // MARK: - Sign In with Email/Password
     func signIn(email: String, password: String) {
-        Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
+        Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
             if let error = error {
                 print("Error signing in: \(error.localizedDescription)")
                 return
             }
+            // If success, mark isLoggedIn = true
             DispatchQueue.main.async {
                 self?.isLoggedIn = true
             }
         }
     }
-    
-    // MARK: - Register (Create New Account)
+
+    // MARK: - Register (Create Account)
     func register(email: String, password: String) {
-        Auth.auth().createUser(withEmail: email, password: password) { [weak self] result, error in
+        Auth.auth().createUser(withEmail: email, password: password) { [weak self] _, error in
             if let error = error {
                 print("Error registering: \(error.localizedDescription)")
                 return
@@ -41,7 +49,7 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-    
+
     // MARK: - Reset Password
     func resetPassword(email: String) {
         Auth.auth().sendPasswordReset(withEmail: email) { error in
@@ -52,7 +60,7 @@ class AuthViewModel: ObservableObject {
             }
         }
     }
-    
+
     // MARK: - Sign Out
     func signOut() {
         do {

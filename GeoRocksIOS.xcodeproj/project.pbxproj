@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		3475A9BA2D19935F0053F2BF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3475A9B92D19935F0053F2BF /* FirebaseAuth */; };
+		3475A9BC2D19BE670053F2BF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3475A9BB2D19BE670053F2BF /* GoogleService-Info.plist */; };
 		34F04D122D1945BD00797395 /* RockDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D112D1945BD00797395 /* RockDto.swift */; };
 		34F04D142D1945C800797395 /* RockDetailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D132D1945C800797395 /* RockDetailDto.swift */; };
 		34F04D162D1945DC00797395 /* NetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D152D1945DC00797395 /* NetworkingService.swift */; };
@@ -24,7 +26,7 @@
 		34FC653F2D192062003CDF70 /* GeoRocksIOSTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC653E2D192062003CDF70 /* GeoRocksIOSTests.swift */; };
 		34FC65492D192062003CDF70 /* GeoRocksIOSUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC65482D192062003CDF70 /* GeoRocksIOSUITests.swift */; };
 		34FC654B2D192062003CDF70 /* GeoRocksIOSUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34FC654A2D192062003CDF70 /* GeoRocksIOSUITestsLaunchTests.swift */; };
-		9815637F461A40AC61E789E0 /* Pods_GeoRocksIOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD663E9458096914A6990DBC /* Pods_GeoRocksIOS.framework */; };
+		392DA3D2F2977B68D18DD1F0 /* Pods_GeoRocksIOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB9119028AEB33931C84D8FB /* Pods_GeoRocksIOS.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +47,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		3475A9BB2D19BE670053F2BF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		34F04D112D1945BD00797395 /* RockDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockDto.swift; sourceTree = "<group>"; };
 		34F04D132D1945C800797395 /* RockDetailDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockDetailDto.swift; sourceTree = "<group>"; };
 		34F04D152D1945DC00797395 /* NetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingService.swift; sourceTree = "<group>"; };
@@ -65,9 +68,9 @@
 		34FC65442D192062003CDF70 /* GeoRocksIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GeoRocksIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		34FC65482D192062003CDF70 /* GeoRocksIOSUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoRocksIOSUITests.swift; sourceTree = "<group>"; };
 		34FC654A2D192062003CDF70 /* GeoRocksIOSUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoRocksIOSUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		562BEA8A2734557BC0017D1A /* Pods-GeoRocksIOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GeoRocksIOS.debug.xcconfig"; path = "Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS.debug.xcconfig"; sourceTree = "<group>"; };
-		65DE967D2C0273714BF92F5A /* Pods-GeoRocksIOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GeoRocksIOS.release.xcconfig"; path = "Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS.release.xcconfig"; sourceTree = "<group>"; };
-		DD663E9458096914A6990DBC /* Pods_GeoRocksIOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GeoRocksIOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		55B5B641017479E04A02D5E5 /* Pods-GeoRocksIOS.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GeoRocksIOS.release.xcconfig"; path = "Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS.release.xcconfig"; sourceTree = "<group>"; };
+		B9285BECF2CA87B7C573A8C7 /* Pods-GeoRocksIOS.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GeoRocksIOS.debug.xcconfig"; path = "Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS.debug.xcconfig"; sourceTree = "<group>"; };
+		EB9119028AEB33931C84D8FB /* Pods_GeoRocksIOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_GeoRocksIOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,7 +78,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				9815637F461A40AC61E789E0 /* Pods_GeoRocksIOS.framework in Frameworks */,
+				392DA3D2F2977B68D18DD1F0 /* Pods_GeoRocksIOS.framework in Frameworks */,
+				3475A9BA2D19935F0053F2BF /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,8 +103,8 @@
 		2179456150BEBDBAA902DFE0 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				562BEA8A2734557BC0017D1A /* Pods-GeoRocksIOS.debug.xcconfig */,
-				65DE967D2C0273714BF92F5A /* Pods-GeoRocksIOS.release.xcconfig */,
+				B9285BECF2CA87B7C573A8C7 /* Pods-GeoRocksIOS.debug.xcconfig */,
+				55B5B641017479E04A02D5E5 /* Pods-GeoRocksIOS.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -146,12 +150,13 @@
 		34FC65212D192061003CDF70 = {
 			isa = PBXGroup;
 			children = (
+				3475A9BB2D19BE670053F2BF /* GoogleService-Info.plist */,
 				34FC652C2D192061003CDF70 /* GeoRocksIOS */,
 				34FC653D2D192062003CDF70 /* GeoRocksIOSTests */,
 				34FC65472D192062003CDF70 /* GeoRocksIOSUITests */,
 				34FC652B2D192061003CDF70 /* Products */,
 				2179456150BEBDBAA902DFE0 /* Pods */,
-				E34EAF71AC5C25B78B6208C2 /* Frameworks */,
+				65C61B2CC60819B9DB9411E1 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -205,10 +210,10 @@
 			path = GeoRocksIOSUITests;
 			sourceTree = "<group>";
 		};
-		E34EAF71AC5C25B78B6208C2 /* Frameworks */ = {
+		65C61B2CC60819B9DB9411E1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DD663E9458096914A6990DBC /* Pods_GeoRocksIOS.framework */,
+				EB9119028AEB33931C84D8FB /* Pods_GeoRocksIOS.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -220,17 +225,20 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 34FC654E2D192062003CDF70 /* Build configuration list for PBXNativeTarget "GeoRocksIOS" */;
 			buildPhases = (
-				991FE9DFC31A4B090DAC9943 /* [CP] Check Pods Manifest.lock */,
+				55339986056A3A1BD5CBDF18 /* [CP] Check Pods Manifest.lock */,
 				34FC65262D192061003CDF70 /* Sources */,
 				34FC65272D192061003CDF70 /* Frameworks */,
 				34FC65282D192061003CDF70 /* Resources */,
-				087454656859B25286865C49 /* [CP] Embed Pods Frameworks */,
+				838106F4B015F3BBA897A218 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = GeoRocksIOS;
+			packageProductDependencies = (
+				3475A9B92D19935F0053F2BF /* FirebaseAuth */,
+			);
 			productName = GeoRocksIOS;
 			productReference = 34FC652A2D192061003CDF70 /* GeoRocksIOS.app */;
 			productType = "com.apple.product-type.application";
@@ -303,6 +311,9 @@
 				Base,
 			);
 			mainGroup = 34FC65212D192061003CDF70;
+			packageReferences = (
+				3475A9B82D19935F0053F2BF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			productRefGroup = 34FC652B2D192061003CDF70 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -321,6 +332,7 @@
 			files = (
 				34FC65352D192062003CDF70 /* Preview Assets.xcassets in Resources */,
 				34FC65322D192062003CDF70 /* Assets.xcassets in Resources */,
+				3475A9BC2D19BE670053F2BF /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,24 +353,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		087454656859B25286865C49 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		991FE9DFC31A4B090DAC9943 /* [CP] Check Pods Manifest.lock */ = {
+		55339986056A3A1BD5CBDF18 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -378,6 +373,23 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		838106F4B015F3BBA897A218 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -556,7 +568,7 @@
 		};
 		34FC654F2D192062003CDF70 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 562BEA8A2734557BC0017D1A /* Pods-GeoRocksIOS.debug.xcconfig */;
+			baseConfigurationReference = B9285BECF2CA87B7C573A8C7 /* Pods-GeoRocksIOS.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -588,7 +600,7 @@
 		};
 		34FC65502D192062003CDF70 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 65DE967D2C0273714BF92F5A /* Pods-GeoRocksIOS.release.xcconfig */;
+			baseConfigurationReference = 55B5B641017479E04A02D5E5 /* Pods-GeoRocksIOS.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -734,6 +746,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		3475A9B82D19935F0053F2BF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3475A9B92D19935F0053F2BF /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3475A9B82D19935F0053F2BF /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 34FC65222D192061003CDF70 /* Project object */;
 }
