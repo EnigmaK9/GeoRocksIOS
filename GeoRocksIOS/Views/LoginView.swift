@@ -31,15 +31,15 @@ struct LoginView: View {
                     .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 30) {
-                    // AppIcon Image
-                    Image("AppIcon") // Ensure "AppIcon" is the name of your logo in Assets.xcassets
+                    // AppIcon Image (Added logo above the title)
+                    Image("Logo") // "Logo" is the name of your logo in Assets.xcassets
                         .resizable()
                         .scaledToFit()
-                        .frame(width: 150, height: 150)
+                        .frame(width: 100, height: 100) // Adjust size as needed
                         .padding(.top, 50)
                     
-                    // The title "GeoRocks iOS" is displayed with a large font
-                    Text("GeoRocks iOS")
+                    // The title "GeoRocks UNAM" is displayed with a large font
+                    Text("GeoRocks UNAM")
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .foregroundColor(Color("DefaultTextColor")) // Custom color
