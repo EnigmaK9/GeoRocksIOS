@@ -11,118 +11,181 @@ import MapKit
 
 struct RockDetailView: View {
     let rockId: String
-    
-    // The RockDetailViewModel is accessed and observed
+
+    // Observes the RockDetailViewModel to manage data and state
     @StateObject var detailViewModel = RockDetailViewModel()
-    
+
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+
+                // Loading state: shows a spinner when data is being fetched
                 if detailViewModel.isLoading {
-                    // A loading indicator is displayed while data is being fetched
                     ProgressView("Loading rock details...")
-                        .progressViewStyle(CircularProgressViewStyle())
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
                         .scaleEffect(1.5)
-                } else if let error = detailViewModel.error {
-                    // An error message is displayed if an error occurs
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
+                }
+                // Error state: displays an error message if fetching data fails
+                else if let error = detailViewModel.error {
                     Text(error)
                         .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                         .padding()
-                } else if let detail = detailViewModel.rockDetail {
-                    // Main image is displayed
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
+                }
+                // Success state: displays rock details
+                else if let detail = detailViewModel.rockDetail {
+
+                    // Main Image with fixed constraints and fallback content
                     if let imageUrl = detail.image, let url = URL(string: imageUrl) {
                         AsyncImage(url: url) { phase in
                             switch phase {
                             case .empty:
                                 Color.gray
-                                    .frame(height: 250)
+                                    .aspectRatio(16/9, contentMode: .fit)
+                                    .overlay(
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                    )
                             case .success(let image):
                                 image
                                     .resizable()
                                     .scaledToFill()
-                                    .frame(height: 250)
+                                    .frame(width: UIScreen.main.bounds.width * 0.9, height: 250)
                                     .clipped()
+
                             case .failure:
                                 Color.red
-                                    .frame(height: 250)
+                                    .aspectRatio(16/9, contentMode: .fit)
+                                    .overlay(
+                                        Image(systemName: "photo")
+                                            .foregroundColor(.white)
+                                            .font(.largeTitle)
+                                    )
                             @unknown default:
                                 Color.gray
-                                    .frame(height: 250)
+                                    .aspectRatio(16/9, contentMode: .fit)
                             }
                         }
                         .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
                     }
-                    
-                    // Title is displayed
+
+                    // Title with enhanced typography
                     Text(detail.title ?? "Unknown Title")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .padding(.top, 8)
+                        .font(.title2)
+                        .fontWeight(.semibold)
                         .multilineTextAlignment(.center)
                         .foregroundColor(Color("DefaultTextColor"))
-                    
-                    // Basic information is displayed
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+
+                    // Basic Information Section with background boxes
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Type: \(detail.aMemberOf ?? "N/A")")
-                        Text("Color: \(detail.color ?? "N/A")")
-                        Text("Hardness: \(detail.hardness ?? 0)")
-                        Text("Magnetic: \(detail.magnetic == true ? "Yes" : "No")")
+                        InfoRow(title: "Type", value: detail.aMemberOf ?? "N/A")
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("DefaultBackground")))
+                            .shadow(radius: 5)
+                        InfoRow(title: "Color", value: detail.color ?? "N/A")
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("DefaultBackground")))
+                            .shadow(radius: 5)
+                        InfoRow(title: "Hardness", value: "\(detail.hardness ?? 0)")
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("DefaultBackground")))
+                            .shadow(radius: 5)
+                        InfoRow(title: "Magnetic", value: detail.magnetic == true ? "Yes" : "No")
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("DefaultBackground")))
+                            .shadow(radius: 5)
                     }
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                    .shadow(radius: 5)
                     .padding(.horizontal)
-                    .foregroundColor(Color("DefaultTextColor"))
-                    
-                    // Video is displayed if available
+
+                    // Video Player for rock-related videos
                     if let videoURLString = detail.video,
                        let videoURL = URL(string: videoURLString) {
-                        VideoPlayer(player: AVPlayer(url: videoURL))
-                            .frame(height: 200)
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                        VStack {
+                            VideoPlayer(player: AVPlayer(url: videoURL))
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .shadow(radius: 5)
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
                     }
-                    
-                    // Map is displayed if coordinates are available
+
+                    // Map View for displaying rock location
                     if let lat = detail.latitude, let lon = detail.longitude {
-                        MapView(lat: lat, lon: lon)
-                            .frame(height: 200)
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                        VStack {
+                            MapView(lat: lat, lon: lon)
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .shadow(radius: 5)
+                        }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
                     }
-                    
-                    // Long description is displayed
+
+                    // Long Description of the rock
                     if let description = detail.longDesc {
                         Text(description)
-                            .padding(.horizontal)
+                            .font(.body)
+                            .padding()
                             .foregroundColor(Color("DefaultTextColor"))
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                            .shadow(radius: 5)
+                            .padding(.horizontal)
                     }
-                    
-                    // Frequently Asked Questions are displayed
+
+                    // Frequently Asked Questions Section with new tone
                     if let faqs = detail.offFrequentlyAskedQuestions {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Frequently Asked Questions:")
                                 .font(.headline)
-                                .padding(.top, 16)
                                 .foregroundColor(Color("DefaultTextColor"))
-                            
+
                             ForEach(faqs, id: \.self) { faq in
                                 Text("• \(faq)")
                                     .font(.subheadline)
                                     .foregroundColor(Color("DefaultTextColor"))
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                         }
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("ButtonDefault")))
+                        .shadow(radius: 5)
                         .padding(.horizontal)
                     }
-                } else {
-                    // A message is displayed if no data is available
+                }
+                // Empty state: no data available
+                else {
                     Text("No rock details available.")
                         .foregroundColor(.gray)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                        .shadow(radius: 5)
                 }
             }
             .padding(.bottom, 24)
         }
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
         .navigationTitle("Rock Detail")
         .onAppear {
-            // The fetchRockDetail function is called when the view appears
+            // Triggers fetching of rock details when the view appears
             detailViewModel.fetchRockDetail(rockId: rockId)
         }
         .alert(isPresented: Binding<Bool>(
@@ -138,8 +201,30 @@ struct RockDetailView: View {
     }
 }
 
+// Reusable view for displaying a row of labeled information
+struct InfoRow: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        HStack {
+            Text("\(title):")
+                .font(.body)
+                .fontWeight(.semibold)
+                .foregroundColor(Color("DefaultTextColor"))
+            Spacer()
+            Text(value)
+                .font(.body)
+                .foregroundColor(Color("DefaultTextColor"))
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
 struct RockDetailView_Previews: PreviewProvider {
     static var previews: some View {
         RockDetailView(rockId: "1")
+            .environmentObject(AuthViewModel())
     }
 }
