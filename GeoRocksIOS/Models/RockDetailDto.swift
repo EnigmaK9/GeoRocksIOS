@@ -55,7 +55,7 @@ struct RockDetailDto: Decodable {
     let localities: [String]?
     
     // Frequently asked questions about the rock are stored
-    let offFrequentlyAskedQuestions: [String]?
+    let frequentlyAskedQuestions: [String]?
     
     // Physical properties of the rock are stored
     let physicalProperties: PhysicalProperties?
@@ -80,7 +80,7 @@ struct RockDetailDto: Decodable {
         case healthRisks = "health_risks"
         case images
         case localities
-        case offFrequentlyAskedQuestions = "off_frequently_asked_questions"
+        case frequentlyAskedQuestions = "frequently_asked_questions"
         case physicalProperties = "physical_properties"
         case chemicalProperties = "chemical_properties"
     }
@@ -88,7 +88,7 @@ struct RockDetailDto: Decodable {
     // MARK: - PhysicalProperties
     struct PhysicalProperties: Decodable {
         // The crystal system of the rock is stored
-        let crystalSystem: String?
+        let ppCrystalSystem: String?
         
         // The colors associated with the rock are stored
         let ppColors: [String]?
@@ -121,7 +121,7 @@ struct RockDetailDto: Decodable {
         let ppMagnetic: Bool?
         
         enum CodingKeys: String, CodingKey {
-            case crystalSystem = "crystal_system"
+            case ppCrystalSystem = "pp_crystal_system"
             case ppColors = "pp_colors"
             case ppLuster = "pp_luster"
             case ppDiaphaneity = "pp_diaphaneity"
@@ -150,7 +150,7 @@ struct RockDetailDto: Decodable {
         let cpCommonImpurities: [String]?
         
         enum CodingKeys: String, CodingKey {
-            case chemicalClassification = "chemical_classification"
+            case chemicalClassification = "cp_chemical_classification"
             case cpFormula = "cp_formula"
             case cpElementsListed = "cp_elements_listed"
             case cpCommonImpurities = "cp_common_impurities"
