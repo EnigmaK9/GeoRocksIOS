@@ -1,13 +1,13 @@
 //
-//  RocksViewModel.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
-//  Description:
-//  The RocksViewModel manages the data and business logic for RocksListView.
-//  Sorting and filtering functionalities have been implemented to enhance user experience.
-//
+ //  RocksViewModel.swift
+ //  GeoRocksIOS
+ //
+ //  Created by Carlos Padilla on 12/12/2024.
+ //
+ //  Description:
+ //  The RocksViewModel manages the data and business logic for RocksListView.
+ //  Sorting, filtering, and favorites functionalities have been implemented to enhance user experience.
+ //
 
 import SwiftUI
 import Combine
@@ -16,6 +16,9 @@ class RocksViewModel: ObservableObject {
     @Published var rocks: [RockDto] = [] // Published property to store the list of rocks
     @Published var isLoading: Bool = false // Published property to indicate loading state
     @Published var errorMessage: String? // Published property to store error messages
+    
+    // Published property to store favorite rock IDs
+    @Published var favoriteRockIDs: Set<String> = [] // Set is used for efficient lookup
     
     private var cancellables = Set<AnyCancellable>() // Set to store Combine subscriptions
     
@@ -49,7 +52,7 @@ class RocksViewModel: ObservableObject {
         }
     }
     
-    /// Filters and sorts the rocks based on the search text and selected sort option.
+    /// Filters and sorts the rocks based on the search text.
     /// - Parameter searchText: The text entered by the user for searching.
     /// - Returns: A filtered and sorted array of RockDto.
     func filteredAndSortedRocks(searchText: String) -> [RockDto] {
@@ -57,10 +60,23 @@ class RocksViewModel: ObservableObject {
             searchText.isEmpty || rock.title.lowercased().contains(searchText.lowercased())
         }
         
-        // Determine the current sort option
-        // Assuming the sortOption is managed externally and affects the rocks array
-        // If additional sorting state is needed, it should be managed here
-        
         return filtered
+    }
+    
+    /// Toggles the favorite status of a given rock.
+    /// - Parameter rock: The RockDto object to be favorited or unfavorited.
+    func toggleFavorite(rock: RockDto) {
+        if favoriteRockIDs.contains(rock.id) {
+            favoriteRockIDs.remove(rock.id)
+        } else {
+            favoriteRockIDs.insert(rock.id)
+        }
+    }
+    
+    /// Checks if a given rock is marked as favorite.
+    /// - Parameter rock: The RockDto object to check.
+    /// - Returns: A Boolean indicating whether the rock is a favorite.
+    func isFavorite(rock: RockDto) -> Bool {
+        favoriteRockIDs.contains(rock.id)
     }
 }

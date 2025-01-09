@@ -1,14 +1,14 @@
 //
-//  RocksListView.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
-//  Description:
-//  The RocksListView displays a list of rocks fetched from the backend.
-//  Sorting functionality has been added to allow users to sort rocks by title.
-//  Pull-to-refresh and search functionalities are also included.
-//
+ //  RocksListView.swift
+ //  GeoRocksIOS
+ //
+ //  Created by Carlos Padilla on 12/12/2024.
+ //
+ //  Description:
+ //  The RocksListView displays a list of rocks fetched from the backend.
+ //  Sorting, search, pull-to-refresh, and favorites functionalities have been added to enhance user experience.
+ //
+
 import SwiftUI
 
 struct RocksListView: View {
@@ -44,7 +44,7 @@ struct RocksListView: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
                     .shadow(radius: 5)
             }
-            // Success state: displays a searchable and sortable list of rocks
+            // Success state: displays a searchable, sortable, and favoritable list of rocks
             else {
                 List {
                     // Search bar is added to the list header
@@ -109,6 +109,17 @@ struct RocksListView: View {
                                         .font(.headline)
                                         .foregroundColor(Color("DefaultTextColor"))
                                         .lineLimit(1)
+                                    
+                                    Spacer()
+                                    
+                                    // Favorite button
+                                    Button(action: {
+                                        rocksViewModel.toggleFavorite(rock: rock)
+                                    }) {
+                                        Image(systemName: rocksViewModel.isFavorite(rock: rock) ? "heart.fill" : "heart")
+                                            .foregroundColor(rocksViewModel.isFavorite(rock: rock) ? .red : .gray)
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle()) // Ensures the button works inside the list
                                 }
                                 .padding(.vertical, 6)
                                 .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
