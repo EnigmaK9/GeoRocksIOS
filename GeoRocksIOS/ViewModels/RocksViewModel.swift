@@ -1,13 +1,13 @@
 //
- //  RocksViewModel.swift
- //  GeoRocksIOS
- //
- //  Created by Carlos Padilla on 12/12/2024.
- //
- //  Description:
- //  The RocksViewModel manages the data and business logic for RocksListView.
- //  Sorting, filtering, and favorites functionalities have been implemented to enhance user experience.
- //
+//  RocksViewModel.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+//  Description:
+//  The RocksViewModel manages the data and business logic for RocksListView.
+//  Sorting, filtering, favorites, and persistence functionalities have been implemented to enhance user experience.
+//
 
 import SwiftUI
 import Combine
@@ -21,6 +21,14 @@ class RocksViewModel: ObservableObject {
     @Published var favoriteRockIDs: Set<String> = [] // Set is used for efficient lookup
     
     private var cancellables = Set<AnyCancellable>() // Set to store Combine subscriptions
+    
+    // Key used for storing favoriteRockIDs in UserDefaults
+    private let favoritesKey = "FavoriteRockIDs"
+    
+    /// Initializes the ViewModel by loading favorites from UserDefaults.
+    init() {
+        loadFavorites()
+    }
     
     /// Fetches the list of rocks from the backend.
     func fetchRocks() {
@@ -71,6 +79,7 @@ class RocksViewModel: ObservableObject {
         } else {
             favoriteRockIDs.insert(rock.id)
         }
+        saveFavorites()
     }
     
     /// Checks if a given rock is marked as favorite.
@@ -78,5 +87,18 @@ class RocksViewModel: ObservableObject {
     /// - Returns: A Boolean indicating whether the rock is a favorite.
     func isFavorite(rock: RockDto) -> Bool {
         favoriteRockIDs.contains(rock.id)
+    }
+    
+    /// Loads favoriteRockIDs from UserDefaults.
+    private func loadFavorites() {
+        if let savedFavorites = UserDefaults.standard.array(forKey: favoritesKey) as? [String] {
+            favoriteRockIDs = Set(savedFavorites)
+        }
+    }
+    
+    /// Saves favoriteRockIDs to UserDefaults.
+    private func saveFavorites() {
+        let favoritesArray = Array(favoriteRockIDs)
+        UserDefaults.standard.set(favoritesArray, forKey: favoritesKey)
     }
 }

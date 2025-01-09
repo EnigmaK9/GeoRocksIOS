@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		342963D72D2F9AD700272463 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963D62D2F9AD700272463 /* FavoritesView.swift */; };
+		342963DA2D2F9C9B00272463 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963D92D2F9C9B00272463 /* AppDelegate.swift */; };
 		3469D69B2D19CE1F00654B8F /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */; };
 		3469D69D2D19CE4F00654B8F /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */; };
 		3469D69F2D19CFAD00654B8F /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69E2D19CFAD00654B8F /* Documentation.docc */; };
@@ -52,6 +54,8 @@
 
 /* Begin PBXFileReference section */
 		34215E772D1C40C100B12F1A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		342963D62D2F9AD700272463 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
+		342963D92D2F9C9B00272463 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		3469D69E2D19CFAD00654B8F /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
@@ -118,6 +122,14 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		342963D82D2F9C8600272463 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				342963D92D2F9C9B00272463 /* AppDelegate.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
 		34F04D0D2D19457900797395 /* Models */ = {
 			isa = PBXGroup;
 			children = (
@@ -147,6 +159,7 @@
 				3475A9BD2D19C20A0053F2BF /* RocksListView.swift */,
 				3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */,
 				3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */,
+				342963D62D2F9AD700272463 /* FavoritesView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -186,6 +199,7 @@
 		34FC652C2D192061003CDF70 /* GeoRocksIOS */ = {
 			isa = PBXGroup;
 			children = (
+				342963D82D2F9C8600272463 /* App */,
 				34215E772D1C40C100B12F1A /* Info.plist */,
 				34F04D102D19459800797395 /* Services */,
 				34F04D0F2D19458D00797395 /* Views */,
@@ -425,7 +439,9 @@
 				34F04D122D1945BD00797395 /* RockDto.swift in Sources */,
 				34F04D142D1945C800797395 /* RockDetailDto.swift in Sources */,
 				3469D69B2D19CE1F00654B8F /* CreateAccountView.swift in Sources */,
+				342963DA2D2F9C9B00272463 /* AppDelegate.swift in Sources */,
 				34F04D1E2D19460200797395 /* MapView.swift in Sources */,
+				342963D72D2F9AD700272463 /* FavoritesView.swift in Sources */,
 				34F04D1A2D1945F300797395 /* MainRocksView.swift in Sources */,
 				3469D69D2D19CE4F00654B8F /* ForgotPasswordView.swift in Sources */,
 				3475A9BE2D19C20A0053F2BF /* RocksListView.swift in Sources */,
