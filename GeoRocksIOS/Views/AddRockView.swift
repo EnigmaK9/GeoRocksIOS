@@ -1,77 +1,136 @@
-// AddRockView.swift
-// GeoRocksIOS
-//
-// This file is intended to add new rocks locally in the frontend.
-// It is assumed that this view will be presented inside a NavigationView.
-// To make it function:
-// 1) Add this file to your project.
-// 2) Inject RocksViewModel with .environmentObject(...) where needed.
-// 3) Navigate to AddRockView from any existing view.
-//
-// Implementation is kept minimal. The user inputs a title and thumbnail URL.
-// On tapping 'Add Rock', the new rock is appended to the local rocks array.
+// -----------------------------------------------------------
+//  AddRockView.swift
+//  GeoRocksIOS
+//  Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+//  Description:
+//  This file allows users to enter detailed information
+//  for a new rock. After validation, the rock is saved
+//  to local storage, and the user is navigated to a detail view.
+// -----------------------------------------------------------
 
 import SwiftUI
 
 struct AddRockView: View {
-    // A reference to the RocksViewModel is declared. It is assumed to be injected at a higher level.
     @EnvironmentObject var rocksViewModel: RocksViewModel
     
-    // State variables are declared to capture the user's inputs for the new rock.
     @State private var rockTitle: String = ""
     @State private var rockThumbnailURL: String = ""
+    @State private var rockColor: String = ""
+    @State private var rockHardness: String = ""
+    @State private var rockFormula: String = ""
+    @State private var rockShortDescription: String = ""
+    @State private var rockLatitude: String = ""
+    @State private var rockLongitude: String = ""
     
-    // The body property defines the user interface.
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // A state property is used for programmatic navigation.
+    @State private var navigateToDetail: Bool = false
+    
+    // A state property is used to store the newly created rock for passing its ID to the detail view.
+    @State private var newlyCreatedRock: RockDto? = nil
+    
     var body: some View {
         NavigationView {
             Form {
-                // A section is created for user inputs.
                 Section(header: Text("Rock Information")) {
-                    // A TextField is used to capture the title.
                     TextField("Enter Rock Title", text: $rockTitle)
-                    
-                    // A TextField is used to capture a thumbnail URL.
                     TextField("Enter Thumbnail URL", text: $rockThumbnailURL)
+                    TextField("Enter Color", text: $rockColor)
+                    TextField("Enter Hardness (1-10)", text: $rockHardness)
+                    TextField("Enter Formula", text: $rockFormula)
+                    TextField("Enter Short Description", text: $rockShortDescription)
                 }
                 
-                // A button is created to trigger the addition of the rock.
+                Section(header: Text("Location (Optional)")) {
+                    TextField("Enter Latitude", text: $rockLatitude)
+                    TextField("Enter Longitude", text: $rockLongitude)
+                }
+                
                 Button(action: {
                     addRock()
                 }) {
                     Text("Add Rock")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.cornerRadius(8))
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
                 }
             }
             .navigationTitle("Add New Rock")
+            .background(
+                // A hidden NavigationLink is used for programmatic navigation.
+                NavigationLink(
+                    destination: Group {
+                        if let rock = newlyCreatedRock {
+                            // RockDetailView(rockId:) is assumed, accepting a String
+                            RockDetailView(rockId: rock.id)
+                        } else {
+                            Text("No Rock to display.")
+                        }
+                    },
+                    isActive: $navigateToDetail,
+                    label: {
+                        EmptyView()
+                    }
+                )
+                .hidden()
+            )
         }
     }
     
-    // MARK: - Add Rock Function
-    // This function adds a new rock to the rocksViewModel with minimal validation.
+    /// A new rock is created and saved, then the view navigates to the rock detail.
     private func addRock() {
-        // A simple guard is used to ensure a title was provided.
-        guard !rockTitle.isEmpty else { return }
+        // A minimal validation check is performed.
+        guard !rockTitle.isEmpty else {
+            alertMessage = "A rock title is required."
+            showAlert = true
+            return
+        }
         
-        // A new RockDto object is created.
+        // Strings are converted to numeric values if possible.
+        let hardnessValue: Int? = Int(rockHardness)
+        let latitudeValue: Double? = Double(rockLatitude)
+        let longitudeValue: Double? = Double(rockLongitude)
+        
+        // A new RockDto object is constructed with a unique ID.
         let newRock = RockDto(
-            id: UUID().uuidString,      // A UUID is assigned as the ID (only local).
+            id: UUID().uuidString,
             thumbnail: rockThumbnailURL.isEmpty ? nil : rockThumbnailURL,
-            title: rockTitle
+            title: rockTitle,
+            color: rockColor.isEmpty ? nil : rockColor,
+            hardness: hardnessValue,
+            formula: rockFormula.isEmpty ? nil : rockFormula,
+            shortDescription: rockShortDescription.isEmpty ? nil : rockShortDescription,
+            latitude: latitudeValue,
+            longitude: longitudeValue
         )
         
-        // The new rock is appended to the local rocks array within RocksViewModel.
-        rocksViewModel.rocks.append(newRock)
+        // The new rock is appended to the ViewModel, which performs local saving.
+        rocksViewModel.addRock(newRock)
         
-        // The fields are cleared for convenience.
+        // Text fields are cleared for convenience.
         rockTitle = ""
         rockThumbnailURL = ""
-    }
-}
-
-// MARK: - Preview
-// A preview is provided for SwiftUI canvas usage.
-struct AddRockView_Previews: PreviewProvider {
-    static var previews: some View {
-        AddRockView()
-            .environmentObject(RocksViewModel())
+        rockColor = ""
+        rockHardness = ""
+        rockFormula = ""
+        rockShortDescription = ""
+        rockLatitude = ""
+        rockLongitude = ""
+        
+        // The newly created rock is stored, and navigation is triggered to the detail view.
+        newlyCreatedRock = newRock
+        navigateToDetail = true
     }
 }

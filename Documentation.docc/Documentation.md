@@ -1,237 +1,224 @@
-# GeoRocksIOS
+# GeoRocksIOS 🪨📱
 
 ![GeoRocksIOS Logo](Resources/logo.png)
 
-GeoRocksIOS is a sophisticated iOS application designed to provide users with an interactive and informative experience about various rocks. Leveraging **SwiftUI** for a seamless user interface and **Firebase** for robust authentication, GeoRocksIOS offers features such as user authentication, detailed rock information, multimedia integration, and interactive maps.
+GeoRocksIOS is an advanced iOS application designed to provide users with an immersive experience related to various types of rocks. Built with **SwiftUI** for a fluid and intuitive user interface and powered by **Firebase** for secure authentication, features such as user sign-in, detailed rock data, multimedia support, and interactive maps are delivered by the application.
 
-## Table of Contents
+## Table of Contents 📑
 
-- [Features](#features)
+- [Features](#features-gear)
 - [Screenshots](#screenshots)
 - [Technologies Used](#technologies-used)
-- [Installation](#installation)
+- [Installation](#installation-box)
 - [Usage](#usage)
 - [Architecture](#architecture)
-- [Contributing](#contributing)
+- [Contributing](#contributing-handshake)
 - [License](#license)
 - [Contact](#contact)
 - [Acknowledgments](#acknowledgments)
 
-## Features
+## Features ⚙️
 
-- **User Authentication:**
-  - **Sign In:** Secure login using email and password.
-  - **Create Account:** Register new users with email verification.
-  - **Forgot Password:** Reset password via email.
-
-- **Rock Catalog:**
-  - **List of Rocks:** Browse through a comprehensive list of rocks.
-  - **Rock Details:** Access detailed information about each rock, including images, videos, descriptions, and properties.
+- **User Authentication**  
+  - **Sign In**: Secure login using email and password.  
+  - **Create Account**: Registration of new users with email verification.  
+  - **Forgot Password**: Passwords can be reset via email links.
   
-- **Multimedia Integration:**
-  - **Images:** View high-quality images of rocks.
-  - **Videos:** Watch related videos for an immersive experience.
+- **Rock Catalog**  
+  - **List of Rocks**: Browsing through a comprehensive catalog of rocks is enabled.  
+  - **Rock Details**: Access to images, videos, descriptions, and additional data is provided.
   
-- **Interactive Maps:**
-  - **Location Tracking:** View the geographical locations where each rock is found using integrated maps.
+- **Multimedia Integration**  
+  - **Images**: High-resolution images can be viewed.  
+  - **Videos**: Curated videos for an in-depth look are available.
+  
+- **Interactive Maps**  
+  - **Location Tracking**: Geological locations of each rock can be explored using embedded maps.
+  
+- **Responsive Design**  
+  - Optimization for a variety of iOS devices ensures consistency in user experience.
 
-- **Responsive Design:**
-  - Optimized for various iOS devices ensuring a consistent user experience.
+## Screenshots 📸
 
-## Screenshots
+Screenshots of significant app views showcasing design and functionality:
 
-*Include screenshots of your application here to showcase its design and functionality.*
-
-![Login Screen](login_screen.png)
+![Login Screen](login_screen.png)  
 *Login Screen*
 
-![Main Rocks View](main_rocks_view.png)
+![Main Rocks View](main_rocks_view.png)  
 *Main Rocks View*
 
-![Rock Detail View](rock_detail_view.png)
+![Rock Detail View](rock_detail_view.png)  
 *Rock Detail View*
 
-## Technologies Used
+## Technologies Used 🛠️
 
-- **SwiftUI:** For building the user interface.
-- **Firebase Authentication:** For managing user sign-in, registration, and password reset functionalities.
-- **Combine:** For handling asynchronous events and data binding.
-- **MapKit:** For displaying interactive maps.
-- **AVKit:** For integrating video playback within the app.
-- **URLSession:** For networking and fetching data from the backend API.
+- **SwiftUI**: Utilized for constructing the app’s UI.  
+- **Firebase Authentication**: Ensures reliable user account creation, login, and password reset flows.  
+- **Combine**: Employed for asynchronous data binding and event handling.  
+- **MapKit**: Provides interactive map views for geological data visualization.  
+- **AVKit**: Facilitates video playback within the app.  
+- **URLSession**: Handles communication with the backend API.
 
-## Installation
+## Installation 📦
 
 ### Prerequisites
 
-- **Xcode 14.0 or later:** Ensure you have the latest version of Xcode installed.
-- **Swift 5.5 or later:** The project is built using Swift 5.5 features.
-- **CocoaPods or Swift Package Manager (Optional):** For managing dependencies, if any.
+- **Xcode 14.0 or later**: Ensure that the latest version of Xcode is installed.
+- **Swift 5.5 or later**: Utilizes modern Swift language features.
+- **CocoaPods or Swift Package Manager (SPM)**: Required for dependency management (optional).
 
 ### Steps
 
-1. **Clone the Repository:**
+1. **Clone the Repository**
 
-   ```bash
-   git clone https://github.com/enigmak9/GeoRocksIOS.git
-   ```
+    ```bash
+    git clone https://github.com/enigmak9/GeoRocksIOS.git
+    ```
 
-2. **Navigate to the Project Directory:**
+2. **Navigate to the Project Directory**
 
-   ```bash
-   cd GeoRocksIOS
-   ```
+    ```bash
+    cd GeoRocksIOS
+    ```
 
-3. **Install Dependencies:**
+3. **Install Dependencies**
 
-   If your project uses CocoaPods:
+    - If using CocoaPods:
 
-   ```bash
-   pod install
-   ```
+        ```bash
+        pod install
+        ```
 
-   Open the workspace:
+      Then open the workspace:
 
-   ```bash
-   open GeoRocksIOS.xcworkspace
-   ```
+        ```bash
+        open GeoRocksIOS.xcworkspace
+        ```
 
-   If using Swift Package Manager, dependencies should resolve automatically.
+    - If using Swift Package Manager, dependencies will be resolved automatically.
 
-4. **Configure Firebase:**
+4. **Configure Firebase**
 
-   - **Add `GoogleService-Info.plist`:**
-     - Download the `GoogleService-Info.plist` file from your Firebase project settings.
-     - Add the file to your Xcode project by dragging it into the Project Navigator.
-   
-   - **Initialize Firebase:**
-     - Firebase is initialized in `GeoRocksIOSApp.swift`. Ensure that the initialization code is present:
-       
-       ```swift
-       import Firebase
+    - **Add the `GoogleService-Info.plist`**:
+      - Download it from your Firebase project settings.
+      - Drag it into your Xcode project’s Project Navigator.
 
-       init() {
-           FirebaseApp.configure()
-       }
-       ```
+    - **Initialize Firebase**:
+      - In `GeoRocksIOSApp.swift` (or `AppDelegate.swift` if using UIKit lifecycle), ensure `FirebaseApp.configure()` is present:
 
-5. **Build and Run:**
+        ```swift
+        import Firebase
 
-   - Select the desired simulator or your physical device.
-   - Press `Cmd + R` to build and run the application.
+        init() {
+            FirebaseApp.configure()
+        }
+        ```
 
-## Usage
+5. **Build and Run**
 
-1. **Launching the App:**
-   - Upon launching, if the user is not authenticated, the **LoginView** is presented.
+    - Select either a simulator or a physical device from Xcode.
+    - Press `Cmd + R` to compile and run the application.
 
-2. **Authentication:**
-   - **Sign In:**
-     - Enter your registered email and password.
-     - Tap "Sign In" to access the main features.
-   - **Create Account:**
-     - Navigate to the **Create Account** view.
-     - Provide a valid email and password to register.
-   - **Forgot Password:**
-     - Navigate to the **Forgot Password** view.
-     - Enter your email to receive a password reset link.
+## Usage 🚀
 
-3. **Exploring Rocks:**
-   - After signing in, access the **MainRocksView**.
-   - Tap "View All Rocks" to browse the list.
-   - Select a rock to view detailed information, including images, videos, and location maps.
+1. **Launch the Application**
+   - If the user is not authenticated, a `LoginView` appears.
 
-4. **Logging Out:**
-   - Tap the "Logout" button in the **MainRocksView** to sign out.
+2. **Authentication**
+   - **Sign In**: Enter valid credentials to access main features.
+   - **Create Account**: Register a new profile if needed.
+   - **Forgot Password**: Initiate password recovery via an email link.
 
-## Architecture
+3. **Rock Catalog**
+   - After signing in, the `MainRocksView` is entered to browse or search for rocks.
+   - Selecting any rock displays detailed information such as images, videos, and map locations.
 
-GeoRocksIOS follows the **MVVM (Model-View-ViewModel)** architectural pattern, ensuring a clean separation of concerns and enhancing testability.
+4. **Logout**
+   - Logging out can be done anytime from the `MainRocksView` via the provided button.
 
-- **Models:**
-  - `RockDto`: Represents the basic information of a rock.
-  - `RockDetailDto`: Contains detailed information about a specific rock.
+## Architecture 🏛️
 
-- **ViewModels:**
-  - `AuthViewModel`: Manages user authentication logic.
-  - `RocksViewModel`: Handles fetching and managing the list of rocks.
-  - `RockDetailViewModel`: Manages the retrieval of detailed rock information.
+GeoRocksIOS follows an MVVM (Model-View-ViewModel) pattern to maintain a clean and testable code structure.
 
-- **Views:**
-  - `LoginView`: User authentication interface.
-  - `CreateAccountView`: Account registration interface.
-  - `ForgotPasswordView`: Password reset interface.
-  - `MainRocksView`: Main interface post-authentication.
-  - `RocksListView`: Displays the list of rocks.
-  - `RockDetailView`: Shows detailed information about a selected rock.
-  - `MapView`: Interactive map displaying rock locations.
+### Models
+- **RockDto**: Represents essential rock information in a list.
+- **RockDetailDto**: Contains in-depth information.
 
-- **Services:**
-  - `NetworkingService`: Handles all networking tasks, including fetching data from the backend API.
+### ViewModels
+- **AuthViewModel**: Handles authentication logic.
+- **RocksViewModel**: Manages fetching and storing rock lists.
+- **RockDetailViewModel**: Fetches detailed rock information.
 
-## Contributing
+### Views
+- **LoginView**: User sign-in interface.
+- **CreateAccountView**: Registration interface.
+- **ForgotPasswordView**: Password reset interface.
+- **MainRocksView**: Main user interface after login.
+- **RocksListView**: Displays fetched rocks in a list.
+- **RockDetailView**: Displays detailed rock information.
+- **MapView**: Shows rock localities on a map.
 
-Contributions are welcome! To contribute to GeoRocksIOS, follow these steps:
+### Services
+- **NetworkingService**: Handles API calls for data retrieval.
+- **UserService**: Manages user profile and password update requests.
 
-1. **Fork the Repository:**
+## Contributing 🤝
 
-   Click the "Fork" button at the top-right corner of the repository page.
+Contributions are encouraged. To participate, please follow these steps:
 
-2. **Clone Your Fork:**
+1. **Fork the Repository**
+   - Click the "Fork" button in the repository’s header.
 
-   ```bash
-   git clone https://github.com/EnigmaK9/GeoRocksIOS.git
-   ```
+2. **Clone Your Fork**
 
-3. **Create a New Branch:**
+    ```bash
+    git clone https://github.com/<your-username>/GeoRocksIOS.git
+    ```
 
-   ```bash
-   git checkout -b feature/YourFeatureName
-   ```
+3. **Create a New Branch**
 
-4. **Make Your Changes:**
+    ```bash
+    git checkout -b feature/YourFeatureName
+    ```
 
-   Implement your feature or bug fix.
+4. **Implement Changes**
+   - Add the new functionality or bug fix.
 
-5. **Commit Your Changes:**
+5. **Commit Your Changes**
 
-   ```bash
-   git commit -m "Add your descriptive commit message"
-   ```
+    ```bash
+    git commit -m "Describe the changes made"
+    ```
 
-6. **Push to Your Fork:**
+6. **Push to Your Fork**
 
-   ```bash
-   git push origin feature/YourFeatureName
-   ```
+    ```bash
+    git push origin feature/YourFeatureName
+    ```
 
-7. **Create a Pull Request:**
+7. **Create a Pull Request**
+   - Go to the original repository and submit a PR describing your changes.
 
-   Navigate to the original repository and click "New Pull Request". Provide a clear description of your changes.
+## License 📝
 
-## License
+Distributed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-
-## Contact
+## Contact 📫
 
 **Carlos Ignacio Padilla Herrera**
 
-- **Email:** [enigmak9@protonmail.com](mailto:enigmak9@protonmail.com)
-- **GitHub:** [@enigmak9](https://github.com/enigmak9)
+- **Email**: [enigmak9@protonmail.com](mailto:enigmak9@protonmail.com)
+- **GitHub**: [@enigmak9](https://github.com/enigmak9)
 
-Feel free to reach out for any queries or collaborations.
+Feel free to reach out with questions or collaboration requests.
 
-## Acknowledgments
+## Acknowledgments 🙏
 
-- [Apple SwiftUI Documentation](https://developer.apple.com/documentation/swiftui/)
-- [Firebase Authentication](https://firebase.google.com/products/auth)
-- [MapKit Framework](https://developer.apple.com/documentation/mapkit)
-- [AVKit Framework](https://developer.apple.com/documentation/avkit)
-- [Apiary Mock Server](https://apiary.io/)
+- Apple SwiftUI Documentation
+- Firebase Authentication
+- MapKit Framework
+- AVKit Framework
+- Apiary Mock Server
 
----
-
-*This README was generated by [EnigmaK9](https://github.com/EnigmaK9).*
+This documentation was generated and curated by EnigmaK9.

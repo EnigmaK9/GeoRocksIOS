@@ -1,10 +1,3 @@
-//
-//  MainRocksView.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
-//
-
 import SwiftUI
 
 struct MainRocksView: View {
@@ -13,19 +6,59 @@ struct MainRocksView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                // Background Color
                 Color("BackgroundColor")
                     .edgesIgnoringSafeArea(.all)
                 
                 VStack(spacing: 20) {
-                    // Welcome Text
                     Text("Welcome to Rocks!")
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(Color("DefaultTextColor"))
                         .padding()
                     
-                    // Button to navigate to the rocks list
+                    // Button to integrate EnhancedLoggerPro
+                    Button("Test Logging") {
+                        LoggingManager.shared.logUserAction(action: "Testing EnhancedLoggerPro", metadata: ["feature": "logger"])
+                    }
+                    .padding()
+                    .background(Color("ButtonDefault"))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
+                    // Button to show IAPExampleView
+                    NavigationLink(destination: IAPExampleView()) {
+                        Text("Open Purchases")
+                            .padding()
+                            .background(Color("ButtonDefault"))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                    
+                    // Button to test local notifications
+                    Button("Test Local Notification") {
+                        let manager = LocalNotificationManager()
+                        manager.scheduleNotification(title: "Hello", body: "From LocalNotificationBuddy", timeInterval: 5)
+                    }
+                    .padding()
+                    .background(Color("ButtonDefault"))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
+                    // Button to test biometric auth
+                    Button("Test Biometric Auth") {
+                        BiometricAuthManager.shared.authenticateUser { success, errorMessage in
+                            if success {
+                                print("Biometric Success")
+                            } else {
+                                print("Biometric Error: \(errorMessage ?? "")")
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color("ButtonDefault"))
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                    
                     NavigationLink(destination: RocksListView()) {
                         Text("View All Rocks")
                             .fontWeight(.semibold)
@@ -39,7 +72,6 @@ struct MainRocksView: View {
                     
                     Spacer()
                     
-                    // Sign Out Button
                     Button(action: {
                         authViewModel.signOut()
                     }) {
@@ -53,12 +85,5 @@ struct MainRocksView: View {
             }
             .navigationTitle("Rocks List")
         }
-    }
-}
-
-struct MainRocksView_Previews: PreviewProvider {
-    static var previews: some View {
-        MainRocksView()
-            .environmentObject(AuthViewModel())
     }
 }

@@ -2,61 +2,66 @@
 //  RockDetailViewModel.swift
 //  GeoRocksIOS
 //
-//  Created by Carlos Padilla on 12/12/2024.
+//  Author: Carlos Padilla
+//  Date: 12/12/2024
 //
-
+//  Description:
+//  This file provides a ViewModel for fetching detailed rock information
+//  from a remote API. A published property holds the retrieved details,
+//  while loading and error states are handled accordingly in passive voice.
+//
 import Foundation
 
 class RockDetailViewModel: ObservableObject {
-    // A published property to store the detailed information of a rock
+    // A published property is used to store the detailed information of a rock.
     @Published var rockDetail: RockDetailDto?
     
-    // A published property to indicate whether data is being loaded
+    // A published property is used to indicate whether data is being loaded.
     @Published var isLoading: Bool = false
     
-    // A published property to store any error messages encountered during data fetching
+    // A published property is used to store any error messages encountered during data fetching.
     @Published var error: String?
 
-    // A listener handle to manage the authentication state listener (if needed)
-    // private var authListenerHandle: AuthStateDidChangeListenerHandle?
-
-    // A function to fetch the details of a specific rock using its ID
+    // A function is used to fetch the details of a specific rock by its ID.
     func fetchRockDetail(rockId: String) {
-        // The correct URL is ensured to be used
+        // The URL is constructed using the specified rockId.
         let urlString = "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_detail/\(rockId)"
         
+        // A check is done to ensure the URL is valid.
         guard let url = URL(string: urlString) else {
             DispatchQueue.main.async {
-                // An invalid URL message is assigned to the error property
+                // The error message is assigned if the URL is invalid.
                 self.error = "Invalid URL: \(urlString)"
             }
             print("Invalid URL: \(urlString)")
             return
         }
         
-        // The loading state is set to true before initiating the network request
+        // The loading state is set to true before initiating the network request.
         self.isLoading = true
         self.error = nil
         
-        // A data task is initiated to fetch data from the specified URL
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+        // A data task is created to fetch data from the specified URL.
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, fetchError in
             DispatchQueue.main.async {
-                // The loading state is set to false after receiving a response
+                // The loading state is set to false after a response is received.
                 self?.isLoading = false
             }
             
-            if let error = error {
+            // A network error check is performed.
+            if let fetchError = fetchError {
                 DispatchQueue.main.async {
-                    // A network error message is assigned to the error property
-                    self?.error = "Network Error: \(error.localizedDescription)"
+                    // A network error message is assigned if an issue occurs.
+                    self?.error = "Network Error: \(fetchError.localizedDescription)"
                 }
-                print("Error fetching rock detail: \(error.localizedDescription)")
+                print("Error fetching rock detail: \(fetchError.localizedDescription)")
                 return
             }
             
+            // A check is performed to ensure data is received.
             guard let data = data else {
                 DispatchQueue.main.async {
-                    // A data reception error message is assigned to the error property
+                    // An error message is assigned if data is missing.
                     self?.error = "No data received."
                 }
                 print("No data returned for rock detail.")
@@ -64,20 +69,20 @@ class RockDetailViewModel: ObservableObject {
             }
             
             do {
-                let decoder = JSONDecoder()
-                // The received JSON data is decoded into a RockDetailDto object
-                let decoded = try decoder.decode(RockDetailDto.self, from: data)
+                // The JSON data is decoded into a RockDetailDto object.
+                let decoded = try JSONDecoder().decode(RockDetailDto.self, from: data)
                 DispatchQueue.main.async {
-                    // The decoded rock detail is assigned to the rockDetail property
+                    // The decoded rock detail is assigned to the rockDetail property.
                     self?.rockDetail = decoded
                 }
             } catch let decodingError {
                 DispatchQueue.main.async {
-                    // A data decoding error message is assigned to the error property
+                    // A data decoding error message is assigned if an exception occurs.
                     self?.error = "Data Decoding Error: \(decodingError.localizedDescription)"
                 }
                 print("Error decoding rock detail: \(decodingError.localizedDescription)")
             }
-        }.resume()
+        }
+        .resume() // The data task is started.
     }
 }
