@@ -9,6 +9,14 @@
 /* Begin PBXBuildFile section */
 		342963D72D2F9AD700272463 /* FavoritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963D62D2F9AD700272463 /* FavoritesView.swift */; };
 		342963DA2D2F9C9B00272463 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963D92D2F9C9B00272463 /* AppDelegate.swift */; };
+		342963DC2D2F9EA500272463 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963DB2D2F9EA500272463 /* SettingsView.swift */; };
+		342963E22D2FA62800272463 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963E12D2FA62800272463 /* UserProfile.swift */; };
+		342963E42D2FA63C00272463 /* UserService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963E32D2FA63C00272463 /* UserService.swift */; };
+		342963E62D2FA65600272463 /* SettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963E52D2FA65600272463 /* SettingsViewModel.swift */; };
+		342963E82D2FA6EF00272463 /* AppearanceSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963E72D2FA6EF00272463 /* AppearanceSettingsViewModel.swift */; };
+		342963EA2D2FA91300272463 /* AccountSettingsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963E92D2FA91300272463 /* AccountSettingsViewModel.swift */; };
+		342963EC2D32A9E000272463 /* AccountSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963EB2D32A9E000272463 /* AccountSettingsView.swift */; };
+		342963EE2D32A9FB00272463 /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 342963ED2D32A9FB00272463 /* SearchBar.swift */; };
 		3469D69B2D19CE1F00654B8F /* CreateAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */; };
 		3469D69D2D19CE4F00654B8F /* ForgotPasswordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */; };
 		3469D69F2D19CFAD00654B8F /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = 3469D69E2D19CFAD00654B8F /* Documentation.docc */; };
@@ -56,6 +64,14 @@
 		34215E772D1C40C100B12F1A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		342963D62D2F9AD700272463 /* FavoritesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoritesView.swift; sourceTree = "<group>"; };
 		342963D92D2F9C9B00272463 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		342963DB2D2F9EA500272463 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		342963E12D2FA62800272463 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
+		342963E32D2FA63C00272463 /* UserService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserService.swift; sourceTree = "<group>"; };
+		342963E52D2FA65600272463 /* SettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsViewModel.swift; sourceTree = "<group>"; };
+		342963E72D2FA6EF00272463 /* AppearanceSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsViewModel.swift; sourceTree = "<group>"; };
+		342963E92D2FA91300272463 /* AccountSettingsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsViewModel.swift; sourceTree = "<group>"; };
+		342963EB2D32A9E000272463 /* AccountSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountSettingsView.swift; sourceTree = "<group>"; };
+		342963ED2D32A9FB00272463 /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateAccountView.swift; sourceTree = "<group>"; };
 		3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotPasswordView.swift; sourceTree = "<group>"; };
 		3469D69E2D19CFAD00654B8F /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
@@ -126,6 +142,7 @@
 			isa = PBXGroup;
 			children = (
 				342963D92D2F9C9B00272463 /* AppDelegate.swift */,
+				342963DB2D2F9EA500272463 /* SettingsView.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -135,6 +152,7 @@
 			children = (
 				34F04D112D1945BD00797395 /* RockDto.swift */,
 				34F04D132D1945C800797395 /* RockDetailDto.swift */,
+				342963E12D2FA62800272463 /* UserProfile.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -145,6 +163,9 @@
 				34F04D1F2D19461500797395 /* AuthViewModel.swift */,
 				34F04D212D19462700797395 /* RocksViewModel.swift */,
 				34F04D232D19462F00797395 /* RockDetailViewModel.swift */,
+				342963E52D2FA65600272463 /* SettingsViewModel.swift */,
+				342963E72D2FA6EF00272463 /* AppearanceSettingsViewModel.swift */,
+				342963E92D2FA91300272463 /* AccountSettingsViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -160,6 +181,7 @@
 				3469D69A2D19CE1F00654B8F /* CreateAccountView.swift */,
 				3469D69C2D19CE4F00654B8F /* ForgotPasswordView.swift */,
 				342963D62D2F9AD700272463 /* FavoritesView.swift */,
+				342963EB2D32A9E000272463 /* AccountSettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -168,6 +190,8 @@
 			isa = PBXGroup;
 			children = (
 				34F04D152D1945DC00797395 /* NetworkingService.swift */,
+				342963E32D2FA63C00272463 /* UserService.swift */,
+				342963ED2D32A9FB00272463 /* SearchBar.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -427,6 +451,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				342963E82D2FA6EF00272463 /* AppearanceSettingsViewModel.swift in Sources */,
 				34F04D202D19461500797395 /* AuthViewModel.swift in Sources */,
 				34F04D182D1945E800797395 /* LoginView.swift in Sources */,
 				34F04D242D19462F00797395 /* RockDetailViewModel.swift in Sources */,
@@ -437,14 +462,21 @@
 				34F04D222D19462700797395 /* RocksViewModel.swift in Sources */,
 				34F04D1C2D1945FD00797395 /* RockDetailView.swift in Sources */,
 				34F04D122D1945BD00797395 /* RockDto.swift in Sources */,
+				342963EA2D2FA91300272463 /* AccountSettingsViewModel.swift in Sources */,
 				34F04D142D1945C800797395 /* RockDetailDto.swift in Sources */,
+				342963EE2D32A9FB00272463 /* SearchBar.swift in Sources */,
 				3469D69B2D19CE1F00654B8F /* CreateAccountView.swift in Sources */,
+				342963E22D2FA62800272463 /* UserProfile.swift in Sources */,
 				342963DA2D2F9C9B00272463 /* AppDelegate.swift in Sources */,
+				342963E42D2FA63C00272463 /* UserService.swift in Sources */,
 				34F04D1E2D19460200797395 /* MapView.swift in Sources */,
 				342963D72D2F9AD700272463 /* FavoritesView.swift in Sources */,
+				342963EC2D32A9E000272463 /* AccountSettingsView.swift in Sources */,
 				34F04D1A2D1945F300797395 /* MainRocksView.swift in Sources */,
 				3469D69D2D19CE4F00654B8F /* ForgotPasswordView.swift in Sources */,
+				342963E62D2FA65600272463 /* SettingsViewModel.swift in Sources */,
 				3475A9BE2D19C20A0053F2BF /* RocksListView.swift in Sources */,
+				342963DC2D2F9EA500272463 /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -1,16 +1,16 @@
-//
-//  RocksViewModel.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
-//  Description:
-//  The RocksViewModel manages the data and business logic for RocksListView.
-//  Sorting, filtering, favorites, and persistence functionalities have been implemented to enhance user experience.
-//
+// RocksViewModel.swift
+// GeoRocksIOS
 
 import SwiftUI
 import Combine
+
+// Enum is defined outside to ensure accessibility across different ViewModels and Views.
+enum SortOption: String, CaseIterable, Identifiable {
+    case ascending = "A-Z"
+    case descending = "Z-A"
+    
+    var id: String { self.rawValue }
+}
 
 class RocksViewModel: ObservableObject {
     @Published var rocks: [RockDto] = [] // Published property to store the list of rocks
@@ -51,7 +51,7 @@ class RocksViewModel: ObservableObject {
     
     /// Sorts the rocks based on the selected sort option.
     /// - Parameter option: The selected SortOption.
-    func sortRocks(option: RocksListView.SortOption) {
+    func sortRocks(option: SortOption) {
         switch option {
         case .ascending:
             rocks.sort { $0.title.lowercased() < $1.title.lowercased() }
