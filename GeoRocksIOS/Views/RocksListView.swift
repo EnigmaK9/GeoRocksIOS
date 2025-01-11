@@ -1,9 +1,6 @@
 // RocksListView.swift
 // GeoRocksIOS
 
-// RocksListView.swift
-// GeoRocksIOS
-
 import SwiftUI
 
 struct RocksListView: View {
@@ -16,6 +13,7 @@ struct RocksListView: View {
     @State private var sortOption: SortOption = .ascending
     @State private var showingSettings = false
     @State private var showingAccountSettings = false
+    @State private var showingAddRock = false
     
     var body: some View {
         NavigationView {
@@ -122,6 +120,19 @@ struct RocksListView: View {
                 .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
                 .navigationTitle("Rocks List")
                 .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            showingAddRock = true
+                        }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(Color("ButtonDefault"))
+                        }
+                        .sheet(isPresented: $showingAddRock) {
+                            AddRockView()
+                                .environmentObject(rocksViewModel)
+                        }
+                    }
+                    
                     ToolbarItem(placement: .navigationBarTrailing) {
                         HStack(spacing: 20) {
                             Button(action: {

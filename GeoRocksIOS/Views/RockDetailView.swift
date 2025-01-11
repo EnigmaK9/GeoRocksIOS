@@ -1,16 +1,10 @@
-//
-//  RockDetailView.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
+// RockDetailView.swift
+// GeoRocksIOS
 
 import SwiftUI
 import AVKit
 import MapKit
 
-// MARK: - InfoRow
-// A reusable view for displaying a labeled piece of information in a row.
 struct InfoRow: View {
     let title: String
     let value: String
@@ -20,66 +14,45 @@ struct InfoRow: View {
             Text("\(title):")
                 .font(.body)
                 .fontWeight(.semibold)
-                .foregroundColor(Color("DefaultTextColor")) // Uses the DefaultTextColor from Assets.xcassets
+                .foregroundColor(Color("DefaultTextColor"))
             Spacer()
             Text(value)
                 .font(.body)
-                .foregroundColor(Color("DefaultTextColor")) // Uses the DefaultTextColor from Assets.xcassets
+                .foregroundColor(Color("DefaultTextColor"))
                 .multilineTextAlignment(.trailing)
         }
-        .padding(.vertical, 4) // Adds vertical padding for spacing
+        .padding(.vertical, 4)
     }
 }
 
 struct RockDetailView: View {
     let rockId: String
     
-    // Observes the RockDetailViewModel to manage data and state.
     @StateObject var detailViewModel = RockDetailViewModel()
     
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-                
-                    
-                
-                // MARK: - Loading State
-                // Shows a loading indicator while data is being fetched.
                 if detailViewModel.isLoading {
                     ProgressView("Loading rock details...")
-                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault"))) // Uses the ButtonDefault color
-                        .scaleEffect(1.5) // Enlarges the progress view
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                        .scaleEffect(1.5)
                         .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color("CoffeeBackground")) // Uses the CoffeeBackground color
-                        )
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("CoffeeBackground")))
                         .shadow(radius: 5)
-                }
-                // MARK: - Error State
-                // Displays an error message if data fetching fails.
-                else if let error = detailViewModel.error {
+                } else if let error = detailViewModel.error {
                     Text(error)
-                        .foregroundColor(.red) // Highlights the error message in red
+                        .foregroundColor(.red)
                         .multilineTextAlignment(.center)
                         .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(Color("CoffeeBackground")) // Uses the CoffeeBackground color
-                        )
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("CoffeeBackground")))
                         .shadow(radius: 5)
-                }
-                // MARK: - Rock Detail Content
-                // Displays the rock details once data is successfully fetched.
-                else if let detail = detailViewModel.rockDetail {
-                    
-                    // MARK: - Rock Name
-                    // Displays the name of the rock with a gradient background.
+                } else if let detail = detailViewModel.rockDetail {
                     Text(detail.title ?? "Rock Details")
                         .font(.title)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
-                        .foregroundColor(Color("DefaultTextColor")) // Uses the DefaultTextColor
+                        .foregroundColor(Color("DefaultTextColor"))
                         .padding()
                         .background(
                             LinearGradient(
@@ -92,8 +65,6 @@ struct RockDetailView: View {
                         .shadow(radius: 5)
                         .padding(.horizontal)
                     
-                    // MARK: - Also Known As
-                    // Displays alternate names for the rock if available.
                     if let alsoKnownAs = detail.alsoKnownAs, !alsoKnownAs.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Also Known As")
@@ -120,13 +91,10 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Main Image
-                    // Displays the main image of the rock with proper loading and error handling.
                     if let imageUrl = detail.image, let url = URL(string: imageUrl) {
                         AsyncImage(url: url) { phase in
                             switch phase {
                             case .empty:
-                                // Placeholder while the image is loading
                                 Color.gray
                                     .aspectRatio(16/9, contentMode: .fit)
                                     .overlay(
@@ -136,14 +104,12 @@ struct RockDetailView: View {
                                             )
                                     )
                             case .success(let image):
-                                // Successfully loaded image
                                 image
                                     .resizable()
                                     .scaledToFill()
                                     .frame(width: UIScreen.main.bounds.width * 0.9, height: 250)
                                     .clipped()
                             case .failure:
-                                // Placeholder for failed image loading
                                 Color.red
                                     .aspectRatio(16/9, contentMode: .fit)
                                     .overlay(
@@ -152,7 +118,6 @@ struct RockDetailView: View {
                                             .font(.largeTitle)
                                     )
                             @unknown default:
-                                // Fallback for any unknown cases
                                 Color.gray
                                     .aspectRatio(16/9, contentMode: .fit)
                             }
@@ -162,8 +127,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Description
-                    // Displays a detailed description of the rock.
                     if let description = detail.longDesc {
                         VStack(alignment: .leading, spacing: 8) {
                             Text(description)
@@ -184,8 +147,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Map
-                    // Displays a map showing the location of the rock.
                     if let lat = detail.latitude, let lon = detail.longitude {
                         VStack {
                             MapView(lat: lat, lon: lon)
@@ -206,8 +167,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Video
-                    // Embeds a video player to display related videos.
                     if let videoURLString = detail.video,
                        let videoURL = URL(string: videoURLString) {
                         VStack {
@@ -229,8 +188,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Basic Information
-                    // Displays basic information about the rock using InfoRow.
                     VStack(alignment: .leading, spacing: 8) {
                         InfoRow(title: "Type", value: detail.aMemberOf ?? "N/A")
                         InfoRow(title: "Color", value: detail.color ?? "N/A")
@@ -250,8 +207,6 @@ struct RockDetailView: View {
                     .shadow(radius: 5)
                     .padding(.horizontal)
                     
-                    // MARK: - Physical Properties
-                    // Displays the physical properties of the rock using InfoRow.
                     if let physicalProperties = detail.physicalProperties {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Physical Properties")
@@ -283,8 +238,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Chemical Properties
-                    // Displays the chemical properties of the rock using InfoRow.
                     if let chemicalProperties = detail.chemicalProperties {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Chemical Properties")
@@ -293,16 +246,12 @@ struct RockDetailView: View {
                             
                             InfoRow(title: "Chemical Classification", value: chemicalProperties.chemicalClassification ?? "N/A")
                             InfoRow(title: "Formula (Chemical)", value: chemicalProperties.cpFormula ?? "N/A")
-                            
-                            if let elementsListed = chemicalProperties.cpElementsListed,
-                               !elementsListed.isEmpty {
+                            if let elementsListed = chemicalProperties.cpElementsListed, !elementsListed.isEmpty {
                                 InfoRow(title: "Elements Listed", value: elementsListed.joined(separator: ", "))
                             } else {
                                 InfoRow(title: "Elements Listed", value: "N/A")
                             }
-                            
-                            if let commonImpurities = chemicalProperties.cpCommonImpurities,
-                               !commonImpurities.isEmpty {
+                            if let commonImpurities = chemicalProperties.cpCommonImpurities, !commonImpurities.isEmpty {
                                 InfoRow(title: "Common Impurities", value: commonImpurities.joined(separator: ", "))
                             } else {
                                 InfoRow(title: "Common Impurities", value: "N/A")
@@ -321,8 +270,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Health Risks
-                    // Displays health risks information if available.
                     if let healthRisks = detail.healthRisks, !healthRisks.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Health Risks")
@@ -346,8 +293,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Additional Images
-                    // Displays additional images in a horizontal scroll view.
                     if let additionalImages = detail.images, !additionalImages.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Additional Images")
@@ -360,7 +305,6 @@ struct RockDetailView: View {
                                             AsyncImage(url: url) { phase in
                                                 switch phase {
                                                 case .empty:
-                                                    // Placeholder while the image is loading
                                                     ProgressView()
                                                         .progressViewStyle(
                                                             CircularProgressViewStyle(tint: Color("ButtonDefault"))
@@ -369,7 +313,6 @@ struct RockDetailView: View {
                                                         .background(Color.gray)
                                                         .cornerRadius(8)
                                                 case .success(let image):
-                                                    // Successfully loaded image
                                                     image
                                                         .resizable()
                                                         .scaledToFill()
@@ -377,7 +320,6 @@ struct RockDetailView: View {
                                                         .clipped()
                                                         .cornerRadius(8)
                                                 case .failure:
-                                                    // Placeholder for failed image loading
                                                     Image(systemName: "photo")
                                                         .resizable()
                                                         .scaledToFit()
@@ -386,14 +328,13 @@ struct RockDetailView: View {
                                                         .background(Color.red)
                                                         .cornerRadius(8)
                                                 @unknown default:
-                                                    // Fallback for any unknown cases
                                                     EmptyView()
                                                 }
                                             }
                                         }
                                     }
                                 }
-                                .padding(.vertical, 4) // Adds vertical padding to the scroll view
+                                .padding(.vertical, 4)
                             }
                         }
                         .padding()
@@ -409,8 +350,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Localities
-                    // Displays a list of localities where the rock is found.
                     if let localities = detail.localities, !localities.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Localities")
@@ -436,8 +375,6 @@ struct RockDetailView: View {
                         .padding(.horizontal)
                     }
                     
-                    // MARK: - Frequently Asked Questions
-                    // Displays frequently asked questions in a wider box.
                     if let faqs = detail.frequentlyAskedQuestions, !faqs.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Frequently Asked Questions")
@@ -460,16 +397,18 @@ struct RockDetailView: View {
                         )
                         .cornerRadius(10)
                         .shadow(radius: 5)
-                        // Increases the box width by adding more horizontal padding.
                         .padding(.horizontal, 32)
                     }
+                    
+                    ShareRockFeature(
+                        rockTitle: detail.title ?? "",
+                        rockDetails: detail.longDesc ?? "No details available"
+                    )
+                    .padding(.top, 16)
                 }
-                   //x| .padding(.bottom, 24) // Adds bottom padding to the VStack
             }
-            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all)) // Sets the background color using Assets.xcassets
-            //.navigationTitle("Rock Detail") // Removed as per user request
+            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
             .onAppear {
-                // Fetches rock details when the view appears.
                 detailViewModel.fetchRockDetail(rockId: rockId)
             }
             .alert(isPresented: Binding<Bool>(
@@ -484,12 +423,11 @@ struct RockDetailView: View {
             }
         }
     }
-    
-    // MARK: - Preview
-    struct RockDetailView_Previews: PreviewProvider {
-        static var previews: some View {
-            RockDetailView(rockId: "1")
-                .environmentObject(AuthViewModel()) // Provides the AuthViewModel if RockDetailView requires it
-        }
+}
+
+struct RockDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        RockDetailView(rockId: "1")
+            .environmentObject(AuthViewModel())
     }
 }
