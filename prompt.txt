@@ -580,47 +580,109 @@ import SwiftUI
 struct SettingsView: View {
     // The SettingsViewModel is accessed from the environment.
     @EnvironmentObject var settingsViewModel: SettingsViewModel
-    
+
     // Environment variable to manage presentation mode.
     @Environment(\.presentationMode) var presentationMode
-    
+
     var body: some View {
         // A navigation view is provided to enable navigation within the settings.
         NavigationView {
             // A form is used to organize settings options.
             Form {
-                // A section is created for theme-related settings.
-                Section(header: Text("Appearance")) {
-                    // A toggle switch is provided for Dark Mode.
-                    Toggle(isOn: $settingsViewModel.isDarkMode) {
-                        // A label is provided for the toggle switch.
-                        Text("Dark Mode")
+                // MARK: - User Profile Section
+                Section {
+                    HStack(spacing: 15) {
+                        // User profile image
+                        Image("userAvatarPlaceholder") // Replace with actual image or user avatar
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 60, height: 60)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.gray, lineWidth: 1)
+                            )
+
+                        // User name and email
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("John Doe") // Replace with actual user name
+                                .font(.headline)
+                            Text("john.doe@example.com") // Replace with actual user email
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
-                    // Accessibility label is added to improve accessibility support.
+                    .padding(.vertical, 10)
+                }
+
+                // MARK: - Appearance Settings Section
+                Section(header: Text("Appearance")) {
+                    // Dark Mode Toggle with icon
+                    Toggle(isOn: $settingsViewModel.isDarkMode) {
+                        HStack {
+                            Image(systemName: settingsViewModel.isDarkMode ? "moon.stars.fill" : "sun.max.fill")
+                                .foregroundColor(settingsViewModel.isDarkMode ? .yellow : .orange)
+                            Text("Dark Mode")
+                        }
+                    }
                     .accessibilityLabel("Toggle Dark Mode")
-                    
-                    // Example: Slider for font size.
+
+                    // Font Size Slider with icon
                     HStack {
+                        Image(systemName: "textformat.size")
+                            .foregroundColor(.blue)
                         Text("Font Size")
                         Slider(value: $settingsViewModel.fontSize, in: 12...24, step: 1)
-                        Text("\(Int(settingsViewModel.fontSize))")
+                        Text("\(Int(settingsViewModel.fontSize)) pt")
+                            .foregroundColor(.secondary)
                     }
                     .accessibilityLabel("Adjust Font Size")
-                    
-                    // High Contrast Toggle
+
+                    // High Contrast Toggle with icon
                     Toggle(isOn: $settingsViewModel.highContrast) {
-                        Text("High Contrast")
+                        HStack {
+                            Image(systemName: "circle.lefthalf.filled")
+                                .foregroundColor(.black)
+                            Text("High Contrast")
+                        }
                     }
                     .accessibilityLabel("Toggle High Contrast")
                 }
-                
-                // Additional settings sections can be added here.
+
+                // MARK: - Notifications Section
+                Section(header: Text("Notifications")) {
+                    Toggle(isOn: .constant(true)) {
+                        HStack {
+                            Image(systemName: "bell.fill")
+                                .foregroundColor(.orange)
+                            Text("Push Notifications")
+                        }
+                    }
+                    .disabled(true) // Example toggle that's currently disabled
+                }
+
+                // MARK: - About Section
+                Section(header: Text("About")) {
+                    NavigationLink(destination: AboutView()) {
+                        HStack {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.blue)
+                            Text("About")
+                        }
+                    }
+
+                    NavigationLink(destination: PrivacyPolicyView()) {
+                        HStack {
+                            Image(systemName: "hand.raised.fill")
+                                .foregroundColor(.red)
+                            Text("Privacy Policy")
+                        }
+                    }
+                }
             }
             // The navigation title is set to "Settings".
             .navigationTitle("Settings")
             // The toolbar is configured to add a close button.
             .toolbar {
-                // A toolbar item is added to the navigation bar's leading side.
                 ToolbarItem(placement: .navigationBarTrailing) {
                     // A button is provided to dismiss the SettingsView.
                     Button(action: {
@@ -631,11 +693,43 @@ struct SettingsView: View {
                         Image(systemName: "xmark")
                             .foregroundColor(Color("ButtonDefault"))
                     }
-                    // Accessibility label is added for the close button.
                     .accessibilityLabel("Close Settings")
                 }
             }
         }
+    }
+}
+
+// MARK: - Placeholder Views for Navigation Links
+struct AboutView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("GeoRocksIOS")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+            Text("Version 1.0.0")
+                .font(.title3)
+                .foregroundColor(.secondary)
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("About")
+    }
+}
+
+struct PrivacyPolicyView: View {
+    var body: some View {
+        ScrollView {
+            Text("""
+            **Privacy Policy**
+
+            Your privacy is important to us. This policy explains how we handle and use your personal information and your rights in relation to that information.
+
+            *We do not collect any personal data.* For more information, please contact us.
+            """)
+                .padding()
+        }
+        .navigationTitle("Privacy Policy")
     }
 }
 
@@ -1753,14 +1847,15 @@ struct UserProfile: Codable {
 ---
 File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/GeoRocksIOSApp.swift
 ---
+// GeoRocksIOSApp.swift
 // -----------------------------------------------------------
-// GeoRocksIOSApp.swift (Adapted)
+// GeoRocksIOSApp.swift (Updated with additional tabs)
 // Author: Carlos Padilla on 01/01/2025
 // -----------------------------------------------------------
 // Description:
 // This file configures the main SwiftUI App. It now displays
-// a TabView for authenticated users, combining RocksListView
-// and a FeatureLauncherView that demonstrates features 4-10.
+// a TabView for authenticated users, combining RocksListView,
+// FeatureLauncherView, GraphsView, and FavoritesView.
 // -----------------------------------------------------------
 
 import SwiftUI
@@ -1769,15 +1864,15 @@ import Firebase
 @main
 struct GeoRocksIOSApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     @StateObject private var authViewModel = AuthViewModel()
     @StateObject private var rocksViewModel = RocksViewModel()
     @StateObject private var settingsViewModel = SettingsViewModel()
     @StateObject private var accountSettingsViewModel = AccountSettingsViewModel()
-    
+
     @AppStorage("isDarkMode") private var isDarkMode: Bool = false
     @State private var isLoading: Bool = true
-    
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -1790,7 +1885,7 @@ struct GeoRocksIOSApp: App {
                         }
                 }
                 else if authViewModel.isLoggedIn {
-                    // A tab-based approach merges RocksListView with FeatureLauncherView:
+                    // A tab-based approach merges multiple views:
                     TabView {
                         // First Tab: RocksListView
                         RocksListView()
@@ -1801,8 +1896,8 @@ struct GeoRocksIOSApp: App {
                             .tabItem {
                                 Label("Rocks", systemImage: "list.bullet")
                             }
-                        
-                        // Second Tab: FeatureLauncherView for push notifications, local notifications, etc.
+
+                        // Second Tab: FeatureLauncherView for additional features
                         FeatureLauncherView()
                             .environmentObject(authViewModel)
                             .environmentObject(rocksViewModel)
@@ -1810,6 +1905,20 @@ struct GeoRocksIOSApp: App {
                             .environmentObject(accountSettingsViewModel)
                             .tabItem {
                                 Label("Features", systemImage: "star.fill")
+                            }
+
+                        // Third Tab: GraphsView to display data graphs
+                        GraphsView()
+                            .environmentObject(rocksViewModel)
+                            .tabItem {
+                                Label("Graphs", systemImage: "chart.bar")
+                            }
+
+                        // Fourth Tab: FavoritesView to display favorited rocks
+                        FavoritesView()
+                            .environmentObject(rocksViewModel)
+                            .tabItem {
+                                Label("Favorites", systemImage: "heart.fill")
                             }
                     }
                 }
@@ -1838,7 +1947,7 @@ struct GeoRocksIOSApp: App {
     }
 }
 
-/// A loading view that appears while authentication status is verified.
+// The LoadingView remains unchanged.
 struct LoadingView: View {
     var body: some View {
         VStack {
@@ -1848,17 +1957,6 @@ struct LoadingView: View {
                 .padding()
         }
         .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
-    }
-}
-
-/// The existing preview provider remains unchanged.
-struct GeoRocksIOSApp_Previews: PreviewProvider {
-    static var previews: some View {
-        RocksListView()
-            .environmentObject(AuthViewModel())
-            .environmentObject(RocksViewModel())
-            .environmentObject(SettingsViewModel())
-            .environmentObject(AccountSettingsViewModel())
     }
 }
 
@@ -1906,127 +2004,129 @@ struct MainRocksView_Previews: PreviewProvider {
 ---
 File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/FavoritesView.swift
 ---
-//
-//  FavoritesView.swift
-//  GeoRocksIOS
-//
-//  Created by Carlos Padilla on 12/12/2024.
-//
-//  Description:
-//  The FavoritesView displays a list of rocks that have been marked as favorites by the user.
-//  Users can navigate to this view to easily access their preferred rocks.
-//
+// FavoritesView.swift
+// GeoRocksIOS
+// -----------------------------------------------------------
+// FavoritesView.swift
+// Author: Carlos Padilla on 12/12/2024
+// -----------------------------------------------------------
+// Description:
+// The FavoritesView displays a list of rocks that have been
+// marked as favorites by the user. Users can navigate to this
+// view to easily access their preferred rocks.
+// -----------------------------------------------------------
 
 import SwiftUI
 
 struct FavoritesView: View {
     @EnvironmentObject var rocksViewModel: RocksViewModel // Accesses the shared RocksViewModel
-    
+
     var body: some View {
-        VStack {
-            // Title for the Favorites section
-            Text("Your Favorite Rocks")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(Color("DefaultTextColor"))
-                .padding(.top, 20)
-            
-            // Checks if there are any favorites
-            if rocksViewModel.favoriteRockIDs.isEmpty {
-                // Message displayed when no favorites are selected
-                Text("You have not added any rocks to your favorites yet.")
-                    .foregroundColor(.gray)
-                    .multilineTextAlignment(.center)
-                    .padding()
-            }
-            else {
-                // List of favorite rocks is displayed
-                List {
-                    ForEach(rocksViewModel.rocks.filter { rocksViewModel.isFavorite(rock: $0) }) { rock in
-                        NavigationLink(destination: RockDetailView(rockId: rock.id)) {
-                            HStack(spacing: 12) {
-                                // Thumbnail image for the rock
-                                if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
-                                    AsyncImage(url: url) { phase in
-                                        switch phase {
-                                        case .empty:
-                                            // Placeholder while the image is loading
-                                            Color.gray
-                                                .frame(width: 50, height: 50)
-                                                .overlay(
-                                                    ProgressView()
-                                                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
-                                                )
-                                        case .success(let image):
-                                            // Successfully loaded image
-                                            image
-                                                .resizable()
-                                                .scaledToFill()
-                                                .frame(width: 50, height: 50)
-                                                .clipped()
-                                        case .failure:
-                                            // Placeholder for failed image loading
-                                            Color.red
-                                                .frame(width: 50, height: 50)
-                                                .overlay(
-                                                    Image(systemName: "photo")
-                                                        .foregroundColor(.white)
-                                                )
-                                        @unknown default:
-                                            // Fallback for any unknown cases
-                                            Color.gray
-                                                .frame(width: 50, height: 50)
+        NavigationView {
+            VStack {
+                // Title for the Favorites section
+                Text("Your Favorite Rocks")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("DefaultTextColor"))
+                    .padding(.top, 20)
+
+                if rocksViewModel.favoriteRockIDs.isEmpty {
+                    // Message displayed when no favorites are selected
+                    Text("You have not added any rocks to your favorites yet.")
+                        .foregroundColor(.gray)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                }
+                else {
+                    // List of favorite rocks is displayed
+                    List {
+                        ForEach(rocksViewModel.rocks.filter { rocksViewModel.isFavorite(rock: $0) }) { rock in
+                            NavigationLink(destination: RockDetailView(rockId: rock.id)) {
+                                HStack(spacing: 12) {
+                                    // Thumbnail image for the rock
+                                    if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
+                                        AsyncImage(url: url) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                // Placeholder while the image is loading
+                                                Color.gray
+                                                    .frame(width: 50, height: 50)
+                                                    .overlay(
+                                                        ProgressView()
+                                                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                                    )
+                                            case .success(let image):
+                                                // Successfully loaded image
+                                                image
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 50, height: 50)
+                                                    .clipped()
+                                            case .failure:
+                                                // Placeholder for failed image loading
+                                                Color.red
+                                                    .frame(width: 50, height: 50)
+                                                    .overlay(
+                                                        Image(systemName: "photo")
+                                                            .foregroundColor(.white)
+                                                    )
+                                            @unknown default:
+                                                // Fallback for any unknown cases
+                                                Color.gray
+                                                    .frame(width: 50, height: 50)
+                                            }
                                         }
-                                    }
-                                    .cornerRadius(8)
-                                    .shadow(radius: 3)
-                                } else {
-                                    // Placeholder for missing image
-                                    Color.gray
-                                        .frame(width: 50, height: 50)
                                         .cornerRadius(8)
                                         .shadow(radius: 3)
+                                    } else {
+                                        // Placeholder for missing image
+                                        Color.gray
+                                            .frame(width: 50, height: 50)
+                                            .cornerRadius(8)
+                                            .shadow(radius: 3)
+                                    }
+
+                                    // Rock title with improved typography
+                                    Text(rock.title)
+                                        .font(.headline)
+                                        .foregroundColor(Color("DefaultTextColor"))
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    // Unfavorite button to remove the rock from favorites
+                                    Button(action: {
+                                        rocksViewModel.toggleFavorite(rock: rock)
+                                    }) {
+                                        Image(systemName: "heart.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                    .buttonStyle(BorderlessButtonStyle())
                                 }
-                                
-                                // Rock title with improved typography
-                                Text(rock.title)
-                                    .font(.headline)
-                                    .foregroundColor(Color("DefaultTextColor"))
-                                    .lineLimit(1)
-                                
-                                Spacer()
-                                
-                                // Unfavorite button to remove the rock from favorites
-                                Button(action: {
-                                    rocksViewModel.toggleFavorite(rock: rock)
-                                }) {
-                                    Image(systemName: "heart.fill")
-                                        .foregroundColor(.red)
-                                }
-                                .buttonStyle(BorderlessButtonStyle()) // Ensures the button works inside the list
+                                .padding(.vertical, 6)
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                                .shadow(radius: 3)
+                                .padding(.horizontal)
                             }
-                            .padding(.vertical, 6)
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
-                            .shadow(radius: 3)
-                            .padding(.horizontal)
                         }
                     }
+                    .listStyle(PlainListStyle())
+                    .background(Color("BackgroundColor"))
                 }
-                .listStyle(PlainListStyle())
-                .background(Color("BackgroundColor"))
+
+                Spacer()
             }
-            
-            Spacer()
+            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+            .navigationTitle("Favorites")
         }
-        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all)) // Sets the background color
-        .navigationTitle("Favorites") // Sets the navigation title
     }
-    
-    struct FavoritesView_Previews: PreviewProvider {
-        static var previews: some View {
-            FavoritesView()
-                .environmentObject(RocksViewModel()) // Provides the RocksViewModel for preview
-        }
+}
+
+struct FavoritesView_Previews: PreviewProvider {
+    static var previews: some View {
+        FavoritesView()
+            .environmentObject(RocksViewModel())
     }
 }
 
@@ -3622,6 +3722,87 @@ struct FeatureLauncherView: View {
                 parameters: ["screen": "FeatureLauncher"]
             )
         }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/GraphsView.swift
+---
+// GraphsView.swift
+// GeoRocksIOS
+// -----------------------------------------------------------
+// GraphsView.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This view displays graphs about the rocks data fetched from
+// the mock backend. It utilizes SwiftUI Charts to visualize
+// data such as the distribution of rock hardness.
+// -----------------------------------------------------------
+
+import SwiftUI
+import Charts
+
+// Define a data model for hardness distribution
+struct HardnessData: Identifiable {
+    let id = UUID()
+    let hardness: Int
+    let count: Int
+}
+
+struct GraphsView: View {
+    @EnvironmentObject var rocksViewModel: RocksViewModel
+
+    // Compute the hardness distribution from the rocks data
+    var hardnessDistribution: [HardnessData] {
+        let hardnessCounts = rocksViewModel.rocks.reduce(into: [:] as [Int: Int]) { counts, rock in
+            if let hardness = rock.hardness {
+                counts[hardness, default: 0] += 1
+            }
+        }
+        return hardnessCounts.map { HardnessData(hardness: $0.key, count: $0.value) }
+            .sorted { $0.hardness < $1.hardness }
+    }
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 20) {
+                    Text("Rock Hardness Distribution")
+                        .font(.title)
+                        .padding()
+
+                    if #available(iOS 16.0, *) {
+                        Chart(hardnessDistribution) { dataPoint in
+                            BarMark(
+                                x: .value("Hardness", dataPoint.hardness),
+                                y: .value("Count", dataPoint.count)
+                            )
+                        }
+                        .chartXAxisLabel("Hardness")
+                        .chartYAxisLabel("Number of Rocks")
+                        .frame(height: 300)
+                        .padding()
+                    } else {
+                        Text("Charts are available on iOS 16 and above.")
+                            .foregroundColor(.red)
+                            .padding()
+                    }
+
+                    // Additional charts can be added here
+
+                }
+            }
+            .navigationTitle("Graphs")
+        }
+    }
+}
+
+struct GraphsView_Previews: PreviewProvider {
+    static var previews: some View {
+        GraphsView()
+            .environmentObject(RocksViewModel())
     }
 }
 

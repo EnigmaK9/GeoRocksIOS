@@ -22,6 +22,8 @@ struct AddRockView: View {
     @State private var rockShortDescription: String = ""
     @State private var rockLatitude: String = ""
     @State private var rockLongitude: String = ""
+    @State private var rockAMemberOf: String = "" // New property for rock classification
+    @State private var rockHealthRisks: String = "" // New property for health risks
     
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
@@ -42,6 +44,8 @@ struct AddRockView: View {
                     TextField("Enter Hardness (1-10)", text: $rockHardness)
                     TextField("Enter Formula", text: $rockFormula)
                     TextField("Enter Short Description", text: $rockShortDescription)
+                    TextField("Enter Member Of (e.g., Igneous)", text: $rockAMemberOf) // New input
+                    TextField("Enter Health Risks (if any)", text: $rockHealthRisks) // New input
                 }
                 
                 Section(header: Text("Location (Optional)")) {
@@ -113,7 +117,9 @@ struct AddRockView: View {
             formula: rockFormula.isEmpty ? nil : rockFormula,
             shortDescription: rockShortDescription.isEmpty ? nil : rockShortDescription,
             latitude: latitudeValue,
-            longitude: longitudeValue
+            longitude: longitudeValue,
+            aMemberOf: rockAMemberOf.isEmpty ? nil : rockAMemberOf, // Include classification
+            healthRisks: rockHealthRisks.isEmpty ? nil : rockHealthRisks // Include health risks
         )
         
         // The new rock is appended to the ViewModel, which performs local saving.
@@ -128,6 +134,8 @@ struct AddRockView: View {
         rockShortDescription = ""
         rockLatitude = ""
         rockLongitude = ""
+        rockAMemberOf = "" // Clear classification field
+        rockHealthRisks = "" // Clear health risks field
         
         // The newly created rock is stored, and navigation is triggered to the detail view.
         newlyCreatedRock = newRock

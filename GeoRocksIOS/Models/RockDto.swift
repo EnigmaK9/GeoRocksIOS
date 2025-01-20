@@ -9,11 +9,13 @@ struct RockDto: Identifiable, Codable {
     let title: String
     
     // Additional fields
-    let color: String?
-    let hardness: Int?
-    let formula: String?
-    let shortDescription: String?
-    let latitude: Double?
-    let longitude: Double?
-}
+    let color: String?              // Color of the rock
+    let hardness: Int?              // Hardness value of the rock
+    let formula: String?            // Chemical formula of the rock
+    let shortDescription: String?    // Short description of the rock
+    let latitude: Double?           // Latitude coordinate for the rock's location
+    let longitude: Double?          // Longitude coordinate for the rock's location
+    let aMemberOf: String?          // Classification of the rock (e.g., Igneous, Metamorphic)
+    let healthRisks: String?        // Associated health risks of the rock
 
+}

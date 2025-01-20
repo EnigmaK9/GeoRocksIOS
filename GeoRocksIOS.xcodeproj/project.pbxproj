@@ -37,6 +37,7 @@
 		3475A9BA2D19935F0053F2BF /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 3475A9B92D19935F0053F2BF /* FirebaseAuth */; };
 		3475A9BC2D19BE670053F2BF /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3475A9BB2D19BE670053F2BF /* GoogleService-Info.plist */; };
 		3475A9BE2D19C20A0053F2BF /* RocksListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3475A9BD2D19C20A0053F2BF /* RocksListView.swift */; };
+		34E3E4272D3E2A97008BCDE0 /* GraphsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34E3E4262D3E2A97008BCDE0 /* GraphsView.swift */; };
 		34F04D122D1945BD00797395 /* RockDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D112D1945BD00797395 /* RockDto.swift */; };
 		34F04D142D1945C800797395 /* RockDetailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D132D1945C800797395 /* RockDetailDto.swift */; };
 		34F04D162D1945DC00797395 /* NetworkingService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34F04D152D1945DC00797395 /* NetworkingService.swift */; };
@@ -105,6 +106,7 @@
 		3469D69E2D19CFAD00654B8F /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
 		3475A9BB2D19BE670053F2BF /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3475A9BD2D19C20A0053F2BF /* RocksListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RocksListView.swift; sourceTree = "<group>"; };
+		34E3E4262D3E2A97008BCDE0 /* GraphsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphsView.swift; sourceTree = "<group>"; };
 		34F04D112D1945BD00797395 /* RockDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockDto.swift; sourceTree = "<group>"; };
 		34F04D132D1945C800797395 /* RockDetailDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RockDetailDto.swift; sourceTree = "<group>"; };
 		34F04D152D1945DC00797395 /* NetworkingService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkingService.swift; sourceTree = "<group>"; };
@@ -230,6 +232,7 @@
 				342963EB2D32A9E000272463 /* AccountSettingsView.swift */,
 				342963F12D32AED600272463 /* AddRockView.swift */,
 				3429640C2D32BDFF00272463 /* FeatureLauncherView.swift */,
+				34E3E4262D3E2A97008BCDE0 /* GraphsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -501,6 +504,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				34E3E4272D3E2A97008BCDE0 /* GraphsView.swift in Sources */,
 				342963E82D2FA6EF00272463 /* AppearanceSettingsViewModel.swift in Sources */,
 				34F04D202D19461500797395 /* AuthViewModel.swift in Sources */,
 				34F04D182D1945E800797395 /* LoginView.swift in Sources */,
