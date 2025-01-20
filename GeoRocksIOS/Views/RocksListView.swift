@@ -24,9 +24,6 @@ struct RocksListView: View {
     @State private var showingAccountSettings = false
     @State private var showingAddRock = false
     
-    // This property provides feedback about caching operations.
-    @State private var cacheMessage: String = ""
-
     var body: some View {
         NavigationView {
             VStack {
@@ -201,40 +198,7 @@ struct RocksListView: View {
                     rocksViewModel.fetchRocks()
                 }
                 
-                // Offline Cache Engine Buttons are placed at the bottom of the view.
-                VStack(spacing: 10) {
-                    // This button saves the fetched rocks data to a local JSON file.
-                    Button("Save Rocks to Cache") {
-                        do {
-                            let data = try JSONEncoder().encode(rocksViewModel.rocks)
-                            try DiskCacheManager.shared.saveData(data, fileName: "rocksCache.json")
-                            cacheMessage = "Rocks saved to local cache."
-                        } catch {
-                            cacheMessage = "Error caching data: \(error.localizedDescription)"
-                        }
-                    }
-                    
-                    // This button loads any cached rocks data if available.
-                    Button("Load Rocks from Cache") {
-                        do {
-                            if let data = try DiskCacheManager.shared.loadData(fileName: "rocksCache.json") {
-                                let decoded = try JSONDecoder().decode([RockDto].self, from: data)
-                                rocksViewModel.rocks = decoded
-                                cacheMessage = "Rocks loaded from cache."
-                            } else {
-                                cacheMessage = "No cached rocks found."
-                            }
-                        } catch {
-                            cacheMessage = "Error loading cache: \(error.localizedDescription)"
-                        }
-                    }
-                    
-                    // A simple text is used to show messages about cache operations.
-                    Text(cacheMessage)
-                        .foregroundColor(.blue)
-                        .padding(.top, 5)
-                }
-                .padding()
+                // **Se ha eliminado el VStack de botones de caché**
             }
         }
     }

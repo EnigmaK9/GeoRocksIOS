@@ -1,4 +1,4 @@
-platform :ios, '17.5' 
+platform :ios, '16.0' 
 
 target 'GeoRocksIOS' do
   use_frameworks!

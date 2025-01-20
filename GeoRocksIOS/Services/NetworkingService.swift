@@ -10,7 +10,9 @@ import Foundation
 enum NetworkingError: Error, LocalizedError {
     case invalidURL
     case noData
-    case decodingError(String)
+    case invalidResponse
+    case httpError(Int) // Associated value for HTTP status code
+    case decodingError(String) // Associated value for decoding message
     
     var errorDescription: String? {
         switch self {
@@ -18,6 +20,10 @@ enum NetworkingError: Error, LocalizedError {
             return "The URL provided was invalid."
         case .noData:
             return "No data was received from the server."
+        case .invalidResponse:
+            return "Invalid response from the server."
+        case .httpError(let statusCode):
+            return "HTTP Code Error: \(statusCode)"
         case .decodingError(let message):
             return "Decoding Error: \(message)"
         }
@@ -49,6 +55,19 @@ class NetworkingService {
             if let error = error {
                 completion(.failure(error))
                 print("Network Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Check for valid HTTP response and status code
+            if let httpResponse = response as? HTTPURLResponse {
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    completion(.failure(NetworkingError.httpError(httpResponse.statusCode)))
+                    print("HTTP Error with status code: \(httpResponse.statusCode)")
+                    return
+                }
+            } else {
+                completion(.failure(NetworkingError.invalidResponse))
+                print("Invalid response from the server.")
                 return
             }
             
@@ -94,6 +113,19 @@ class NetworkingService {
             if let error = error {
                 completion(.failure(error))
                 print("Network Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Check for valid HTTP response and status code
+            if let httpResponse = response as? HTTPURLResponse {
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    completion(.failure(NetworkingError.httpError(httpResponse.statusCode)))
+                    print("HTTP Error with status code: \(httpResponse.statusCode)")
+                    return
+                }
+            } else {
+                completion(.failure(NetworkingError.invalidResponse))
+                print("Invalid response from the server.")
                 return
             }
             
