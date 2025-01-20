@@ -1768,14 +1768,16 @@ struct RockDto: Identifiable, Codable {
     let title: String
     
     // Additional fields
-    let color: String?
-    let hardness: Int?
-    let formula: String?
-    let shortDescription: String?
-    let latitude: Double?
-    let longitude: Double?
-}
+    let color: String?              // Color of the rock
+    let hardness: Int?              // Hardness value of the rock
+    let formula: String?            // Chemical formula of the rock
+    let shortDescription: String?    // Short description of the rock
+    let latitude: Double?           // Latitude coordinate for the rock's location
+    let longitude: Double?          // Longitude coordinate for the rock's location
+    let aMemberOf: String?          // Classification of the rock (e.g., Igneous, Metamorphic)
+    let healthRisks: String?        // Associated health risks of the rock
 
+}
 
 
 ---
@@ -2368,6 +2370,8 @@ struct AddRockView: View {
     @State private var rockShortDescription: String = ""
     @State private var rockLatitude: String = ""
     @State private var rockLongitude: String = ""
+    @State private var rockAMemberOf: String = "" // New property for rock classification
+    @State private var rockHealthRisks: String = "" // New property for health risks
     
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
@@ -2388,6 +2392,8 @@ struct AddRockView: View {
                     TextField("Enter Hardness (1-10)", text: $rockHardness)
                     TextField("Enter Formula", text: $rockFormula)
                     TextField("Enter Short Description", text: $rockShortDescription)
+                    TextField("Enter Member Of (e.g., Igneous)", text: $rockAMemberOf) // New input
+                    TextField("Enter Health Risks (if any)", text: $rockHealthRisks) // New input
                 }
                 
                 Section(header: Text("Location (Optional)")) {
@@ -2459,7 +2465,9 @@ struct AddRockView: View {
             formula: rockFormula.isEmpty ? nil : rockFormula,
             shortDescription: rockShortDescription.isEmpty ? nil : rockShortDescription,
             latitude: latitudeValue,
-            longitude: longitudeValue
+            longitude: longitudeValue,
+            aMemberOf: rockAMemberOf.isEmpty ? nil : rockAMemberOf, // Include classification
+            healthRisks: rockHealthRisks.isEmpty ? nil : rockHealthRisks // Include health risks
         )
         
         // The new rock is appended to the ViewModel, which performs local saving.
@@ -2474,6 +2482,8 @@ struct AddRockView: View {
         rockShortDescription = ""
         rockLatitude = ""
         rockLongitude = ""
+        rockAMemberOf = "" // Clear classification field
+        rockHealthRisks = "" // Clear health risks field
         
         // The newly created rock is stored, and navigation is triggered to the detail view.
         newlyCreatedRock = newRock
@@ -3738,7 +3748,8 @@ File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/GraphsV
 // Description:
 // This view displays graphs about the rocks data fetched from
 // the mock backend. It utilizes SwiftUI Charts to visualize
-// data such as the distribution of rock hardness.
+// data such as the distribution of rock hardness, types,
+// classifications, and health risks.
 // -----------------------------------------------------------
 
 import SwiftUI
@@ -3748,6 +3759,27 @@ import Charts
 struct HardnessData: Identifiable {
     let id = UUID()
     let hardness: Int
+    let count: Int
+}
+
+// Define a data model for rock types based on color
+struct RockTypeData: Identifiable {
+    let id = UUID()
+    let type: String
+    let count: Int
+}
+
+// Define a data model for rock member classifications
+struct RockMemberData: Identifiable {
+    let id = UUID()
+    let member: String
+    let count: Int
+}
+
+// Define a data model for health risks distribution
+struct HealthRiskData: Identifiable {
+    let id = UUID()
+    let risk: String
     let count: Int
 }
 
@@ -3765,6 +3797,36 @@ struct GraphsView: View {
             .sorted { $0.hardness < $1.hardness }
     }
 
+    // Compute rock type distribution (using color as a proxy for type)
+    var rockTypeDistribution: [RockTypeData] {
+        let typeCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
+            let type = rock.color ?? "Unknown"
+            counts[type, default: 0] += 1
+        }
+        return typeCounts.map { RockTypeData(type: $0.key, count: $0.value) }
+            .sorted { $0.type < $1.type }
+    }
+
+    // Compute rock member classification distribution
+    var rockMemberDistribution: [RockMemberData] {
+        let memberCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
+            let member = rock.aMemberOf ?? "Unknown" // Placeholder since aMemberOf doesn't exist
+            counts[member, default: 0] += 1
+        }
+        return memberCounts.map { RockMemberData(member: $0.key, count: $0.value) }
+            .sorted { $0.member < $1.member }
+    }
+
+    // Compute health risks distribution
+    var healthRiskDistribution: [HealthRiskData] {
+        let riskCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
+            let risk = rock.healthRisks ?? "None"
+            counts[risk, default: 0] += 1
+        }
+        return riskCounts.map { HealthRiskData(risk: $0.key, count: $0.value) }
+            .sorted { $0.risk < $1.risk }
+    }
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -3774,11 +3836,13 @@ struct GraphsView: View {
                         .padding()
 
                     if #available(iOS 16.0, *) {
+                        // Bar chart for hardness distribution
                         Chart(hardnessDistribution) { dataPoint in
                             BarMark(
                                 x: .value("Hardness", dataPoint.hardness),
                                 y: .value("Count", dataPoint.count)
                             )
+                            .foregroundStyle(Color.blue)
                         }
                         .chartXAxisLabel("Hardness")
                         .chartYAxisLabel("Number of Rocks")
@@ -3790,8 +3854,59 @@ struct GraphsView: View {
                             .padding()
                     }
 
-                    // Additional charts can be added here
+                    // Bar chart for rock type distribution
+                    Text("Rock Type Distribution")
+                        .font(.title)
+                        .padding()
+                    if #available(iOS 16.0, *) {
+                        Chart(rockTypeDistribution) { dataPoint in
+                            BarMark(
+                                x: .value("Type", dataPoint.type),
+                                y: .value("Count", dataPoint.count)
+                            )
+                            .foregroundStyle(Color.green)
+                        }
+                        .chartXAxisLabel("Rock Type")
+                        .chartYAxisLabel("Count")
+                        .frame(height: 300)
+                        .padding()
+                    }
 
+                    // Bar chart for rock member classification distribution
+                    Text("Rock Member Classification Distribution")
+                        .font(.title)
+                        .padding()
+                    if #available(iOS 16.0, *) {
+                        Chart(rockMemberDistribution) { dataPoint in
+                            BarMark(
+                                x: .value("Member", dataPoint.member),
+                                y: .value("Count", dataPoint.count)
+                            )
+                            .foregroundStyle(Color.orange)
+                        }
+                        .chartXAxisLabel("Rock Member Classification")
+                        .chartYAxisLabel("Count")
+                        .frame(height: 300)
+                        .padding()
+                    }
+
+                    // Bar chart for health risks distribution
+                    Text("Health Risks Distribution")
+                        .font(.title)
+                        .padding()
+                    if #available(iOS 16.0, *) {
+                        Chart(healthRiskDistribution) { dataPoint in
+                            BarMark(
+                                x: .value("Risk", dataPoint.risk),
+                                y: .value("Count", dataPoint.count)
+                            )
+                            .foregroundStyle(Color.red)
+                        }
+                        .chartXAxisLabel("Health Risk")
+                        .chartYAxisLabel("Count")
+                        .frame(height: 300)
+                        .padding()
+                    }
                 }
             }
             .navigationTitle("Graphs")
