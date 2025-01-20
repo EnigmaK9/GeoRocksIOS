@@ -1,0 +1,4097 @@
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOSTests/GeoRocksIOSTests.swift
+---
+//
+//  GeoRocksIOSTests.swift
+//  GeoRocksIOSTests
+//
+//  Created by Carlos Ignacio Padilla Herrera on 22/12/24.
+//
+
+import XCTest
+@testable import GeoRocksIOS
+
+final class GeoRocksIOSTests: XCTestCase {
+
+    override func setUpWithError() throws {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+    }
+
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    func testExample() throws {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+        // Any test you write for XCTest can be annotated as throws and async.
+        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
+        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    }
+
+    func testPerformanceExample() throws {
+        // This is an example of a performance test case.
+        self.measure {
+            // Put the code you want to measure the time of here.
+        }
+    }
+
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/RockDetailViewModel.swift
+---
+//
+//  RockDetailViewModel.swift
+//  GeoRocksIOS
+//
+//  Author: Carlos Padilla
+//  Date: 12/12/2024
+//
+//  Description:
+//  This file provides a ViewModel for fetching detailed rock information
+//  from a remote API. A published property holds the retrieved details,
+//  while loading and error states are handled accordingly in passive voice.
+//
+import Foundation
+
+class RockDetailViewModel: ObservableObject {
+    // A published property is used to store the detailed information of a rock.
+    @Published var rockDetail: RockDetailDto?
+    
+    // A published property is used to indicate whether data is being loaded.
+    @Published var isLoading: Bool = false
+    
+    // A published property is used to store any error messages encountered during data fetching.
+    @Published var error: String?
+
+    // A function is used to fetch the details of a specific rock by its ID.
+    func fetchRockDetail(rockId: String) {
+        // The URL is constructed using the specified rockId.
+        let urlString = "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_detail/\(rockId)"
+        
+        // A check is done to ensure the URL is valid.
+        guard let url = URL(string: urlString) else {
+            DispatchQueue.main.async {
+                // The error message is assigned if the URL is invalid.
+                self.error = "Invalid URL: \(urlString)"
+            }
+            print("Invalid URL: \(urlString)")
+            return
+        }
+        
+        // The loading state is set to true before initiating the network request.
+        self.isLoading = true
+        self.error = nil
+        
+        // A data task is created to fetch data from the specified URL.
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, fetchError in
+            DispatchQueue.main.async {
+                // The loading state is set to false after a response is received.
+                self?.isLoading = false
+            }
+            
+            // A network error check is performed.
+            if let fetchError = fetchError {
+                DispatchQueue.main.async {
+                    // A network error message is assigned if an issue occurs.
+                    self?.error = "Network Error: \(fetchError.localizedDescription)"
+                }
+                print("Error fetching rock detail: \(fetchError.localizedDescription)")
+                return
+            }
+            
+            // A check is performed to ensure data is received.
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    // An error message is assigned if data is missing.
+                    self?.error = "No data received."
+                }
+                print("No data returned for rock detail.")
+                return
+            }
+            
+            do {
+                // The JSON data is decoded into a RockDetailDto object.
+                let decoded = try JSONDecoder().decode(RockDetailDto.self, from: data)
+                DispatchQueue.main.async {
+                    // The decoded rock detail is assigned to the rockDetail property.
+                    self?.rockDetail = decoded
+                }
+            } catch let decodingError {
+                DispatchQueue.main.async {
+                    // A data decoding error message is assigned if an exception occurs.
+                    self?.error = "Data Decoding Error: \(decodingError.localizedDescription)"
+                }
+                print("Error decoding rock detail: \(decodingError.localizedDescription)")
+            }
+        }
+        .resume() // The data task is started.
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/SettingsViewModel.swift
+---
+// SettingsViewModel.swift
+// GeoRocksIOS
+
+import Foundation
+import Combine
+
+// Import the UserServiceProtocol from UserService.swift.
+// Ensure that UserService.swift is part of the project and correctly linked.
+// For example:
+import GeoRocksIOS // Replace with your actual module name if different.
+
+// The SettingsViewModel conforms to ObservableObject to allow SwiftUI views to observe changes.
+class SettingsViewModel: ObservableObject {
+    // UserService is injected to handle user-related operations.
+    private var userService: UserServiceProtocol
+    
+    // Published properties for settings can be added here.
+    @Published var isDarkMode: Bool = false
+    @Published var fontSize: Double = 16.0
+    @Published var highContrast: Bool = false
+    
+    // Additional settings-related properties can be declared here.
+    
+    // The initializer injects the UserService, defaulting to the shared instance.
+    init(userService: UserServiceProtocol = UserService.shared) {
+        self.userService = userService
+        // Additional initialization can be performed here.
+    }
+    
+    // Example function to update user profile.
+    func updateUserProfile(name: String, email: String) {
+        userService.updateProfile(name: name, email: email) { [weak self] result in
+            switch result {
+            case .success():
+                // Handle successful profile update.
+                print("Profile updated successfully.")
+            case .failure(let error):
+                // Handle errors during profile update.
+                print("Error updating profile: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Example function to change password.
+    func changePassword(oldPassword: String, newPassword: String) {
+        userService.changePassword(oldPassword: oldPassword, newPassword: newPassword) { [weak self] result in
+            switch result {
+            case .success():
+                // Handle successful password change.
+                print("Password changed successfully.")
+            case .failure(let error):
+                // Handle errors during password change.
+                print("Error changing password: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    // Additional settings-related functions can be implemented here.
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/AppearanceSettingsViewModel.swift
+---
+//
+//  AppearanceSettingsViewModel.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
+//
+//  Description:
+//  ViewModel para gestionar la configuración de apariencia de la aplicación.
+//
+
+import Foundation
+import SwiftUI
+
+class AppearanceSettingsViewModel: ObservableObject {
+    // Uso de @AppStorage para persistir preferencias de tema
+    @AppStorage("isDarkMode") var isDarkMode: Bool = false
+    @AppStorage("fontSize") var fontSize: Double = 16.0
+    @AppStorage("highContrast") var highContrast: Bool = false
+    
+    // Opciones de tamaño de fuente
+    let fontSizes: [Double] = [14, 16, 18, 20, 22]
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/AccountSettingsViewModel.swift
+---
+// AccountSettingsViewModel.swift
+// GeoRocksIOS
+
+// AccountSettingsViewModel.swift
+// GeoRocksIOS
+
+import Foundation
+import Combine
+
+class AccountSettingsViewModel: ObservableObject {
+    private var userService: UserServiceProtocol
+    
+    @Published var isUpdatingProfile: Bool = false
+    @Published var updateProfileSuccessMessage: String?
+    @Published var updateProfileErrorMessage: String?
+    
+    init(userService: UserServiceProtocol = UserService.shared) {
+        self.userService = userService
+    }
+    
+    func updateUserProfile(name: String, email: String) {
+        self.isUpdatingProfile = true
+        userService.updateProfile(name: name, email: email) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.isUpdatingProfile = false
+                switch result {
+                case .success():
+                    self?.updateProfileSuccessMessage = "Profile updated successfully."
+                    self?.updateProfileErrorMessage = nil
+                case .failure(let error):
+                    self?.updateProfileErrorMessage = error.localizedDescription
+                    self?.updateProfileSuccessMessage = nil
+                }
+            }
+        }
+    }
+    
+    func clearMessages() {
+        updateProfileSuccessMessage = nil
+        updateProfileErrorMessage = nil
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/AuthViewModel.swift
+---
+//
+ //  AuthViewModel.swift
+ //  GeoRocksIOS
+ //
+ //  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
+ //
+ //  Description:
+ //  The AuthViewModel manages user authentication state and related actions.
+ //
+ 
+ import SwiftUI
+ import FirebaseAuth
+ 
+ class AuthViewModel: ObservableObject {
+     // A published property to track the user's login status
+     @Published var isLoggedIn = false
+     
+     // Published properties for error and success messages
+     @Published var errorMessage: String?
+     @Published var successMessage: String?
+     
+     // Listener handle to manage the authentication state listener
+     private var authListenerHandle: AuthStateDidChangeListenerHandle?
+     
+     init() {
+         // Check if a user is already authenticated at the app's launch
+         self.isLoggedIn = Auth.auth().currentUser != nil
+         
+         // Authentication state changes are being listened to
+         authListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
+             DispatchQueue.main.async {
+                 // The login status is updated based on the user's authentication state
+                 self?.isLoggedIn = user != nil
+             }
+         }
+     }
+     
+     deinit {
+         // Remove the authentication state listener when the ViewModel is deinitialized
+         if let handle = authListenerHandle {
+             Auth.auth().removeStateDidChangeListener(handle)
+         }
+     }
+     
+     // MARK: - Sign In with Email/Password
+     func signIn(email: String, password: String) {
+         // A sign-in attempt is made using the provided email and password
+         Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
+             DispatchQueue.main.async {
+                 if let error = error {
+                     // Set the error message to be displayed
+                     self?.errorMessage = error.localizedDescription
+                     print("Error signing in: \(error.localizedDescription)")
+                 } else {
+                     // If the sign-in is successful, the login status is marked as true
+                     self?.isLoggedIn = true
+                 }
+             }
+         }
+     }
+     
+     // MARK: - Register (Create Account)
+     func register(email: String, password: String) {
+         // An account creation attempt is made using the provided email and password
+         Auth.auth().createUser(withEmail: email, password: password) { [weak self] _, error in
+             DispatchQueue.main.async {
+                 if let error = error {
+                     // Set the error message to be displayed
+                     self?.errorMessage = error.localizedDescription
+                     print("Error registering: \(error.localizedDescription)")
+                 } else {
+                     // If the registration is successful, the login status is marked as true
+                     self?.isLoggedIn = true
+                     // Optionally, set a success message
+                     self?.successMessage = "Account created successfully!"
+                 }
+             }
+         }
+     }
+     
+     // MARK: - Reset Password
+     func resetPassword(email: String) {
+         // A password reset email is sent to the provided email address
+         Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
+             DispatchQueue.main.async {
+                 if let error = error {
+                     // Set the error message to be displayed
+                     self?.errorMessage = error.localizedDescription
+                     print("Error sending password reset: \(error.localizedDescription)")
+                 } else {
+                     // Set a success message to inform the user
+                     self?.successMessage = "Password reset email sent to \(email)."
+                     print("Password reset email sent to \(email)")
+                 }
+             }
+         }
+     }
+     
+     // MARK: - Sign Out
+     func signOut() {
+         do {
+             // An attempt is made to sign out the current user
+             try Auth.auth().signOut()
+             // If the sign-out is successful, the login status is marked as false
+             self.isLoggedIn = false
+         } catch {
+             // Set the error message to be displayed
+             self.errorMessage = error.localizedDescription
+             print("Error signing out: \(error.localizedDescription)")
+         }
+     }
+     
+     // MARK: - Clear Messages
+     func clearMessages() {
+         errorMessage = nil
+         successMessage = nil
+     }
+     
+     /// Checks the authentication status and updates the loading state accordingly.
+     /// - Parameter completion: A closure that returns a boolean indicating authentication success.
+     func checkAuthenticationStatus(completion: @escaping (Bool) -> Void) {
+         // The current user is retrieved from FirebaseAuth.
+         if Auth.auth().currentUser != nil {
+             // The user is authenticated.
+             completion(true)
+         } else {
+             // The user is not authenticated.
+             completion(false)
+         }
+     }
+ }
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ViewModels/RocksViewModel.swift
+---
+// -----------------------------------------------------------
+//  RocksViewModel.swift
+//  GeoRocksIOS
+//  Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+//  Description:
+//  This ViewModel manages a list of RockDto objects, providing
+//  both local disk persistence (via DiskCacheManagerV2) and
+//  remote fetching (via NetworkingService). Favorite rock IDs
+//  are stored in UserDefaults, and sorting or filtering is
+//  supported. Loading states and error messages are also handled.
+// -----------------------------------------------------------
+
+import SwiftUI
+import Combine
+
+/// Sorting options for rocks by title.
+enum SortOption: String, CaseIterable, Identifiable {
+    case ascending = "A-Z"
+    case descending = "Z-A"
+    
+    var id: String { self.rawValue }
+}
+
+/// The main ViewModel that manages rock data, local persistence, remote fetching, sorting, and favorites.
+class RocksViewModel: ObservableObject {
+    
+    // MARK: - Published Properties
+    
+    /// Holds the list of rocks.
+    @Published var rocks: [RockDto] = []
+    
+    /// Indicates a loading or network request in progress.
+    @Published var isLoading: Bool = false
+    
+    /// Stores error messages for UI presentation.
+    @Published var errorMessage: String?
+    
+    /// Stores IDs of favorite rocks.
+    @Published var favoriteRockIDs: Set<String> = []
+    
+    // MARK: - Internal Properties
+    
+    /// Used for any future Combine subscriptions (if needed).
+    private var cancellables = Set<AnyCancellable>()
+    
+    /// Key used for saving and loading favoriteRockIDs in UserDefaults.
+    private let favoritesKey = "FavoriteRockIDs"
+    
+    // MARK: - Initializer
+    
+    /// Initializes the ViewModel by loading favorites from UserDefaults and attempting to load stored rocks from disk.
+    init() {
+        loadFavorites()   // Load favorite IDs from UserDefaults
+        loadFromDisk()    // Load rocks from local storage if available
+    }
+    
+    // MARK: - Local Persistence
+    
+    /// Saves the current array of rocks to disk using DiskCacheManagerV2.
+    func saveToDisk() {
+        do {
+            try DiskCacheManagerV2.shared.saveRocks(rocks)
+        } catch {
+            print("An error occurred while saving rocks: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Loads the array of rocks from local storage if a file exists.
+    func loadFromDisk() {
+        do {
+            let loaded = try DiskCacheManagerV2.shared.loadRocks()
+            self.rocks = loaded
+        } catch {
+            print("Rocks could not be loaded from disk or file not found: \(error.localizedDescription)")
+        }
+    }
+    
+    /// Adds a new rock to the list and immediately saves to disk.
+    func addRock(_ rock: RockDto) {
+        rocks.append(rock)
+        saveToDisk()
+    }
+    
+    // MARK: - Remote Fetch
+    
+    /// Fetches the list of rocks from the backend API.
+    /// Any existing data is overwritten, and the loaded array is also saved locally for offline use.
+    func fetchRocks() {
+        isLoading = true
+        errorMessage = nil
+        
+        NetworkingService.shared.fetchRockList { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                self.isLoading = false
+                switch result {
+                case .success(let fetchedRocks):
+                    self.rocks = fetchedRocks
+                    self.saveToDisk()  // Save fetched data locally
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                    print("Error fetching rocks: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // MARK: - Sorting and Filtering
+    
+    /// Sorts the rocks in ascending or descending order by title.
+    func sortRocks(option: SortOption) {
+        switch option {
+        case .ascending:
+            rocks.sort { $0.title.lowercased() < $1.title.lowercased() }
+        case .descending:
+            rocks.sort { $0.title.lowercased() > $1.title.lowercased() }
+        }
+    }
+    
+    /// Returns rocks filtered by a search text (case-insensitive match in the title).
+    /// More complex sorting could also be applied if needed.
+    func filteredAndSortedRocks(searchText: String) -> [RockDto] {
+        rocks.filter { rock in
+            searchText.isEmpty || rock.title.lowercased().contains(searchText.lowercased())
+        }
+    }
+    
+    // MARK: - Favorites
+    
+    /// Toggles the favorite status of a specific rock. The local Set is updated, and changes are saved to UserDefaults.
+    func toggleFavorite(rock: RockDto) {
+        if favoriteRockIDs.contains(rock.id) {
+            favoriteRockIDs.remove(rock.id)
+        } else {
+            favoriteRockIDs.insert(rock.id)
+        }
+        saveFavorites()
+    }
+    
+    /// Checks if a rock is currently marked as favorite.
+    func isFavorite(rock: RockDto) -> Bool {
+        favoriteRockIDs.contains(rock.id)
+    }
+    
+    /// Loads the set of favorite rock IDs from UserDefaults.
+    private func loadFavorites() {
+        if let savedFavorites = UserDefaults.standard.array(forKey: favoritesKey) as? [String] {
+            favoriteRockIDs = Set(savedFavorites)
+        }
+    }
+    
+    /// Saves the current set of favorite rock IDs to UserDefaults.
+    private func saveFavorites() {
+        let favoritesArray = Array(favoriteRockIDs)
+        UserDefaults.standard.set(favoritesArray, forKey: favoritesKey)
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/App/SettingsView.swift
+---
+// SettingsView.swift
+// GeoRocksIOS
+
+import SwiftUI
+
+struct SettingsView: View {
+    // The SettingsViewModel is accessed from the environment.
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
+    
+    // Environment variable to manage presentation mode.
+    @Environment(\.presentationMode) var presentationMode
+    
+    var body: some View {
+        // A navigation view is provided to enable navigation within the settings.
+        NavigationView {
+            // A form is used to organize settings options.
+            Form {
+                // A section is created for theme-related settings.
+                Section(header: Text("Appearance")) {
+                    // A toggle switch is provided for Dark Mode.
+                    Toggle(isOn: $settingsViewModel.isDarkMode) {
+                        // A label is provided for the toggle switch.
+                        Text("Dark Mode")
+                    }
+                    // Accessibility label is added to improve accessibility support.
+                    .accessibilityLabel("Toggle Dark Mode")
+                    
+                    // Example: Slider for font size.
+                    HStack {
+                        Text("Font Size")
+                        Slider(value: $settingsViewModel.fontSize, in: 12...24, step: 1)
+                        Text("\(Int(settingsViewModel.fontSize))")
+                    }
+                    .accessibilityLabel("Adjust Font Size")
+                    
+                    // High Contrast Toggle
+                    Toggle(isOn: $settingsViewModel.highContrast) {
+                        Text("High Contrast")
+                    }
+                    .accessibilityLabel("Toggle High Contrast")
+                }
+                
+                // Additional settings sections can be added here.
+            }
+            // The navigation title is set to "Settings".
+            .navigationTitle("Settings")
+            // The toolbar is configured to add a close button.
+            .toolbar {
+                // A toolbar item is added to the navigation bar's leading side.
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    // A button is provided to dismiss the SettingsView.
+                    Button(action: {
+                        // The SettingsView is dismissed when the button is tapped.
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        // An "X" mark icon is used to represent the close action.
+                        Image(systemName: "xmark")
+                            .foregroundColor(Color("ButtonDefault"))
+                    }
+                    // Accessibility label is added for the close button.
+                    .accessibilityLabel("Close Settings")
+                }
+            }
+        }
+    }
+}
+
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView()
+            .environmentObject(SettingsViewModel()) // Provides SettingsViewModel for preview.
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/App/AppDelegate.swift
+---
+//
+//  AppDelegate.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
+//
+//  Description:
+//  The AppDelegate handles Firebase configuration and other app lifecycle events.
+//
+
+import UIKit
+import Firebase
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+        // Firebase is configured when the app launches.
+        FirebaseApp.configure()
+        return true
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/ThemeWizard.swift
+---
+// -----------------------------------------------------------
+// ThemeWizard.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file manages a simple theme toggling system between light and dark modes.
+// The shared ThemeManager class is used, and dynamic colors are provided.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+/// ThemeManager maintains a published property representing the current theme.
+class ThemeManager: ObservableObject {
+    @Published var currentTheme: AppTheme = .light
+    static let shared = ThemeManager()
+    
+    private init() {}
+    
+    /// This function switches the theme from light to dark or vice versa.
+    func toggleTheme() {
+        currentTheme = (currentTheme == .light) ? .dark : .light
+    }
+}
+
+/// AppTheme is a simple enumeration for representing the user's current theme.
+enum AppTheme {
+    case light
+    case dark
+}
+
+/// Extension on Color to provide dynamic background and foreground colors.
+extension Color {
+    static var dynamicBackground: Color {
+        ThemeManager.shared.currentTheme == .light ? .white : .black
+    }
+    
+    static var dynamicForeground: Color {
+        ThemeManager.shared.currentTheme == .light ? .black : .white
+    }
+}
+
+/// A SwiftUI view demonstrating the theme toggle process.
+struct ThemeExampleView: View {
+    @ObservedObject var themeManager = ThemeManager.shared
+    
+    var body: some View {
+        ZStack {
+            Color.dynamicBackground.edgesIgnoringSafeArea(.all)
+            VStack(spacing: 20) {
+                Text("Theme Wizard")
+                    .font(.title)
+                    .foregroundColor(Color.dynamicForeground)
+                
+                Button("Toggle Theme") {
+                    themeManager.toggleTheme()
+                }
+                .padding()
+                .background(Color.dynamicForeground)
+                .foregroundColor(Color.dynamicBackground)
+                .cornerRadius(8)
+            }
+            .padding()
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/PurchaseMaster.swift
+---
+// -----------------------------------------------------------
+// PurchaseMaster.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file demonstrates how in-app purchases (IAP) can be handled
+// with StoreKit. Products are fetched, listed, and purchased.
+// -----------------------------------------------------------
+
+import StoreKit
+import SwiftUI
+
+/// IAPManager manages fetching products, making purchases, and handling transactions.
+class IAPManager: NSObject, ObservableObject, SKProductsRequestDelegate, SKPaymentTransactionObserver {
+    static let shared = IAPManager()
+    
+    @Published var products: [SKProduct] = []
+    
+    private override init() {
+        super.init()
+        SKPaymentQueue.default().add(self)
+    }
+    
+    /// This function sends a request to the App Store for the given product IDs.
+    func fetchProducts(productIDs: [String]) {
+        let request = SKProductsRequest(productIdentifiers: Set(productIDs))
+        request.delegate = self
+        request.start()
+    }
+    
+    /// This delegate method is called when product info returns from the App Store.
+    /// The products array is updated here on the main thread.
+    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+        DispatchQueue.main.async {
+            self.products = response.products
+        }
+    }
+    
+    /// A purchase is initiated for the specified product if it is valid and available.
+    func buy(product: SKProduct) {
+        let payment = SKPayment(product: product)
+        SKPaymentQueue.default().add(payment)
+    }
+    
+    /// Transactions are monitored here, and each completed/failed/restored transaction is finished.
+    func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+        for transaction in transactions {
+            switch transaction.transactionState {
+            case .purchased, .restored, .failed:
+                SKPaymentQueue.default().finishTransaction(transaction)
+            default:
+                break
+            }
+        }
+    }
+}
+
+/// This SwiftUI view provides a simple interface for fetching and buying products.
+struct IAPExampleView: View {
+    @StateObject private var iapManager = IAPManager.shared
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Purchase Master")
+                .font(.title)
+            
+            // A button to fetch products from the App Store.
+            Button("Fetch Products") {
+                iapManager.fetchProducts(productIDs: ["com.yourapp.exampleitem"])
+            }
+            
+            // A list displays the available products, each of which can be purchased by tapping.
+            List(iapManager.products, id: \.productIdentifier) { product in
+                HStack {
+                    Text(product.localizedTitle)
+                    Spacer()
+                    
+                    let priceString = "\(product.priceLocale.currencySymbol ?? "$")\(product.price)"
+                    Text(priceString)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    iapManager.buy(product: product)
+                }
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/VoiceOverChampion.swift
+---
+// -----------------------------------------------------------
+// VoiceOverChampion.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file illustrates how to add VoiceOver labels to make a SwiftUI
+// interface more accessible. Use .accessibilityLabel to describe elements.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+/// A demonstration of how to make views accessible for VoiceOver.
+struct AccessibilityExampleView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            // A descriptive label is added for VoiceOver.
+            Text("VoiceOver Champion")
+                .font(.title)
+                .accessibilityLabel("VoiceOver Champion Title")
+            
+            // The image includes an accessibility label for non-visual context.
+            Image(systemName: "hand.point.up.left")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 80, height: 80)
+                .accessibilityLabel("Hand Pointing Up Left Icon")
+            
+            // A button also uses an accessibility label.
+            Button("Learn More") {
+                // This could navigate or show more information.
+            }
+            .accessibilityLabel("Learn More Button")
+            .padding()
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/SecureDataVault.swift
+---
+// -----------------------------------------------------------
+// SecureDataVault.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file provides a simple wrapper for secure storage
+// using the iOS Keychain. It demonstrates how to safely
+// store, retrieve, and delete sensitive data.
+//
+// -----------------------------------------------------------
+
+import Foundation
+import Security
+import SwiftUI
+
+/// SecureStorage is a basic Keychain interface that
+/// supports saving, retrieving, and deleting data.
+class SecureStorage {
+    /// A shared singleton instance for global Keychain operations.
+    static let shared = SecureStorage()
+    
+    private init() {}
+    
+    /// Saves a string value to the Keychain under the given key.
+    /// - Parameters:
+    ///   - key: Unique identifier for the item
+    ///   - value: Data to be stored
+    /// - Returns: Boolean indicating success or failure
+    func save(key: String, value: String) -> Bool {
+        guard let data = value.data(using: .utf8) else { return false }
+        
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock
+        ]
+        
+        SecItemDelete(query as CFDictionary) // Remove old item if it exists
+        let status = SecItemAdd(query as CFDictionary, nil)
+        return status == errSecSuccess
+    }
+    
+    /// Retrieves a string value from the Keychain using the given key.
+    /// - Parameter key: Unique identifier for the item
+    /// - Returns: The string value if found, otherwise `nil`
+    func retrieve(key: String) -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne
+        ]
+        
+        var dataTypeRef: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
+        
+        if status == errSecSuccess, let data = dataTypeRef as? Data {
+            return String(data: data, encoding: .utf8)
+        }
+        return nil
+    }
+    
+    /// Deletes a string value from the Keychain.
+    /// - Parameter key: Unique identifier for the item
+    /// - Returns: Boolean indicating success or failure
+    func delete(key: String) -> Bool {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrAccount as String: key
+        ]
+        let status = SecItemDelete(query as CFDictionary)
+        return status == errSecSuccess
+    }
+}
+
+/// A sample SwiftUI view demonstrating how to use SecureStorage
+/// to safely manage sensitive data in the Keychain.
+struct SecureStorageExampleView: View {
+    @State private var savedValue: String = ""
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Secure Data Vault")
+                .font(.title)
+            
+            Button("Save to Keychain") {
+                SecureStorage.shared.save(key: "testKey", value: "TopSecretValue")
+            }
+            
+            Button("Retrieve from Keychain") {
+                if let retrieved = SecureStorage.shared.retrieve(key: "testKey") {
+                    savedValue = retrieved
+                }
+            }
+            
+            Button("Delete from Keychain") {
+                _ = SecureStorage.shared.delete(key: "testKey")
+            }
+            
+            Text("Value: \(savedValue)")
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/OfflineCacheEngine.swift
+---
+// -----------------------------------------------------------
+// OfflineCacheEngine.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file illustrates a simple caching mechanism using
+// local storage on the device. It demonstrates saving,
+// loading, and removing data from the app's cache directory.
+//
+// -----------------------------------------------------------
+
+import Foundation
+import SwiftUI
+
+/// DiskCacheManager enables saving, loading, and removing
+/// data in the app's cache directory.
+class DiskCacheManager {
+    static let shared = DiskCacheManager()
+    
+    private init() {}
+    
+    /// Saves the provided data to a file within the cache directory.
+    /// - Parameters:
+    ///   - data: The raw Data to be stored
+    ///   - fileName: The name of the file to store the data in
+    func saveData(_ data: Data, fileName: String) throws {
+        let url = try cacheURL(for: fileName)
+        try data.write(to: url)
+    }
+    
+    /// Loads data from a file within the cache directory.
+    /// - Parameter fileName: The name of the file to read
+    /// - Returns: The Data if it exists, otherwise `nil`
+    func loadData(fileName: String) throws -> Data? {
+        let url = try cacheURL(for: fileName)
+        if FileManager.default.fileExists(atPath: url.path) {
+            return try Data(contentsOf: url)
+        }
+        return nil
+    }
+    
+    /// Removes a file from the cache directory if it exists.
+    /// - Parameter fileName: The name of the file to remove
+    func removeData(fileName: String) throws {
+        let url = try cacheURL(for: fileName)
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
+    }
+    
+    /// Constructs a URL for a file in the cache directory.
+    /// - Parameter fileName: The name of the file
+    /// - Returns: A valid file URL in the cache directory
+    private func cacheURL(for fileName: String) throws -> URL {
+        guard let cacheDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else {
+            throw NSError(domain: "DiskCacheError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Cache directory not found"])
+        }
+        return cacheDirectory.appendingPathComponent(fileName)
+    }
+}
+
+/// A sample SwiftUI view demonstrating how to use the DiskCacheManager
+/// for saving, loading, and removing data from local storage.
+struct OfflineCachingExampleView: View {
+    @State private var message: String = "No data cached yet"
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Offline Cache Engine")
+                .font(.title)
+            
+            Button("Save Data") {
+                let sample = "Hello, Offline Cache!"
+                guard let data = sample.data(using: .utf8) else { return }
+                
+                do {
+                    try DiskCacheManager.shared.saveData(data, fileName: "sample.cache")
+                    message = "Data Saved Locally!"
+                } catch {
+                    message = "Error saving data: \(error.localizedDescription)"
+                }
+            }
+            
+            Button("Load Data") {
+                do {
+                    if let loadedData = try DiskCacheManager.shared.loadData(fileName: "sample.cache"),
+                       let text = String(data: loadedData, encoding: .utf8) {
+                        message = "Loaded: \(text)"
+                    } else {
+                        message = "No cached data found."
+                    }
+                } catch {
+                    message = "Error loading data: \(error.localizedDescription)"
+                }
+            }
+            
+            Button("Remove Data") {
+                do {
+                    try DiskCacheManager.shared.removeData(fileName: "sample.cache")
+                    message = "Data removed from cache."
+                } catch {
+                    message = "Error removing data: \(error.localizedDescription)"
+                }
+            }
+            
+            Text(message)
+                .multilineTextAlignment(.center)
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/PushNotificationNinja.swift
+---
+// -----------------------------------------------------------
+// PushNotificationNinja.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file demonstrates how to request and handle push notifications.
+// It includes a shared manager class that configures UNUserNotificationCenter
+// and listens for incoming notifications.
+// -----------------------------------------------------------
+
+import Foundation
+import UserNotifications
+import SwiftUI
+
+/// PushNotificationManager is used to manage and delegate push notifications.
+class PushNotificationManager: NSObject, ObservableObject, UNUserNotificationCenterDelegate {
+    static let shared = PushNotificationManager()
+    
+    private override init() {
+        super.init()
+        UNUserNotificationCenter.current().delegate = self
+    }
+    
+    /// This function requests user authorization for push notifications.
+    /// If granted, remote notifications are registered. Otherwise, an error is printed.
+    func requestAuthorization() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            } else if let error = error {
+                print("Error requesting notification authorization: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    /// This delegate function is triggered when a notification is tapped.
+    /// It prints the userInfo dictionary for demonstration purposes.
+    func userNotificationCenter(
+        _ center: UNUserNotificationCenter,
+        didReceive response: UNNotificationResponse,
+        withCompletionHandler completionHandler: @escaping () -> Void
+    ) {
+        let userInfo = response.notification.request.content.userInfo
+        print("User tapped push notification: \(userInfo)")
+        completionHandler()
+    }
+}
+
+/// This SwiftUI view shows a button that triggers the authorization request.
+/// The manager can be called in AppDelegate or any other place as well.
+struct PushNotificationExampleView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Push Notification Ninja")
+                .font(.title)
+            
+            Button("Request Notification Authorization") {
+                PushNotificationManager.shared.requestAuthorization()
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/BiometricGuardian.swift
+---
+// -----------------------------------------------------------
+// BiometricGuardian.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file demonstrates the use of LocalAuthentication to prompt
+// the user for biometric authentication (Face ID/Touch ID).
+// -----------------------------------------------------------
+
+import LocalAuthentication
+import SwiftUI
+
+/// BiometricAuthManager manages the Face ID / Touch ID authentication flow.
+class BiometricAuthManager {
+    static let shared = BiometricAuthManager()
+    
+    private init() {}
+    
+    /// This function attempts to evaluate a policy for biometric authentication.
+    /// A success or failure result is returned via a completion callback.
+    func authenticateUser(completion: @escaping (Bool, String?) -> Void) {
+        let context = LAContext()
+        var error: NSError?
+        
+        // The device is checked to see if biometrics are available.
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Unlock GeoRocks"
+            ) { success, evaluateError in
+                DispatchQueue.main.async {
+                    if success {
+                        completion(true, nil)
+                    } else {
+                        completion(false, evaluateError?.localizedDescription)
+                    }
+                }
+            }
+        } else {
+            completion(false, "Biometric authentication not available.")
+        }
+    }
+}
+
+/// A SwiftUI view that includes a button to demonstrate biometric authentication.
+struct BiometricAuthExampleView: View {
+    @State private var statusMessage: String = "Locked"
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Biometric Guardian")
+                .font(.title)
+            
+            Text(statusMessage)
+                .font(.headline)
+            
+            Button("Authenticate with Biometrics") {
+                BiometricAuthManager.shared.authenticateUser { success, errorMessage in
+                    if success {
+                        statusMessage = "Unlocked!"
+                    } else {
+                        statusMessage = "Authentication failed: \(errorMessage ?? "Unknown error")"
+                    }
+                }
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/LocalNotificationBuddy.swift
+---
+// -----------------------------------------------------------
+// LocalNotificationBuddy.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file shows how to schedule local notifications using
+// UNUserNotificationCenter. A time interval is specified, and the
+// user receives a notification after that delay.
+// -----------------------------------------------------------
+
+import SwiftUI
+import UserNotifications
+
+/// LocalNotificationManager provides a function to schedule local notifications.
+class LocalNotificationManager: ObservableObject {
+    /// A local notification is scheduled with the specified title, body,
+    /// and time interval. An alert sound is included by default.
+    func scheduleNotification(title: String, body: String, timeInterval: TimeInterval) {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = UNNotificationSound.default
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling local notification: \(error.localizedDescription)")
+            }
+        }
+    }
+}
+
+/// A SwiftUI view that includes a button to schedule a simple test notification.
+struct LocalNotificationExampleView: View {
+    var manager = LocalNotificationManager()
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Local Notification Buddy")
+                .font(.title)
+            
+            Button("Schedule Notification (5s)") {
+                manager.scheduleNotification(
+                    title: "Reminder",
+                    body: "Check out the new updates!",
+                    timeInterval: 5
+                )
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/AnalyticsGuru.swift
+---
+// -----------------------------------------------------------
+// AnalyticsGuru.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file shows a basic analytics manager that can be used to log events
+// and set user properties. It can be extended to incorporate Firebase or
+// other third-party analytics solutions.
+// -----------------------------------------------------------
+
+import Foundation
+import SwiftUI
+
+/// AnalyticsManager logs events and sets user properties for analytics usage.
+class AnalyticsManager {
+    static let shared = AnalyticsManager()
+    
+    private init() {}
+    
+    /// This function logs an analytics event with optional parameters.
+    /// It prints the result here, but could be replaced by a real analytics call.
+    func logEvent(name: String, parameters: [String: Any]?) {
+        print("Analytics Event: \(name), parameters: \(String(describing: parameters))")
+    }
+    
+    /// This function sets a user property, such as "user_type: premium".
+    /// In a real situation, this would call the appropriate analytics method.
+    func setUserProperty(_ value: String?, forName name: String) {
+        print("Set user property \(name) to \(value ?? "")")
+    }
+}
+
+/// This SwiftUI view provides a small interface to log events and set user properties.
+struct AnalyticsExampleView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Analytics Guru")
+                .font(.title)
+            
+            Button("Log Analytics Event") {
+                AnalyticsManager.shared.logEvent(
+                    name: "UserTappedAnalyticsEvent",
+                    parameters: ["screen": "AnalyticsExampleView"]
+                )
+            }
+            
+            Button("Set User Property") {
+                AnalyticsManager.shared.setUserProperty("PremiumUser", forName: "user_status")
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/DiskCacheManager.swift
+---
+// DiskCacheManager.swift
+import Foundation
+
+/// This class handles reading and writing JSON data to local storage.
+class DiskCacheManagerV2 {
+    static let shared = DiskCacheManagerV2()
+    private init() {}
+    
+    private let fileName = "rocksData.json"
+    
+    /// Retrieves the file URL in the Documents directory.
+    private func getFileURL() throws -> URL {
+        guard let documentDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first else {
+            throw NSError(domain: "DiskCacheManager",
+                          code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "The Documents directory could not be found."])
+        }
+        return documentDir.appendingPathComponent(fileName)
+    }
+    
+    /// Saves an array of RockDto objects to disk.
+    func saveRocks(_ rocks: [RockDto]) throws {
+        let url = try getFileURL()
+        let data = try JSONEncoder().encode(rocks)
+        try data.write(to: url, options: .atomic)
+    }
+    
+    /// Loads an array of RockDto objects from disk if the file exists.
+    func loadRocks() throws -> [RockDto] {
+        let url = try getFileURL()
+        let data = try Data(contentsOf: url)
+        let loaded = try JSONDecoder().decode([RockDto].self, from: data)
+        return loaded
+    }
+    
+    /// (Optional) Removes the JSON file if it exists.
+    func removeRocksData() throws {
+        let url = try getFileURL()
+        if FileManager.default.fileExists(atPath: url.path) {
+            try FileManager.default.removeItem(at: url)
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Features/EnhancedLoggerPro.swift
+---
+// -----------------------------------------------------------
+// EnhancedLoggerPro.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file demonstrates a simple but powerful logging utility
+// that helps capture user actions, errors, and debug messages.
+// -----------------------------------------------------------
+
+import Foundation
+import SwiftUI
+
+/// LoggingManager is a central class for logging throughout the app.
+class LoggingManager {
+    /// A shared singleton instance to access the logger anywhere in the app.
+    static let shared = LoggingManager()
+    
+    private init() {}
+    
+    /// Logs a user action, which can include additional metadata for context.
+    /// - Parameters:
+    ///   - action: A description of the user's action
+    ///   - metadata: Optional key-value pairs providing additional context
+    func logUserAction(action: String, metadata: [String: Any] = [:]) {
+        print("Logging Action: \(action), Metadata: \(metadata)")
+    }
+    
+    /// Logs an error, capturing the error message and optional metadata.
+    /// - Parameters:
+    ///   - error: The `Error` object to log
+    ///   - metadata: Optional key-value pairs providing context about the error
+    func logError(error: Error, metadata: [String: Any] = [:]) {
+        print("Logging Error: \(error.localizedDescription), Metadata: \(metadata)")
+    }
+    
+    /// Logs a debug message, suitable for providing insight during development and testing.
+    /// - Parameters:
+    ///   - message: The debug message to log
+    ///   - metadata: Optional key-value pairs providing extra context
+    func logDebug(message: String, metadata: [String: Any] = [:]) {
+        print("Logging Debug: \(message), Metadata: \(metadata)")
+    }
+}
+
+/// A sample SwiftUI view demonstrating how to use the LoggingManager.
+struct LoggingExampleView: View {
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Enhanced Logger Pro")
+                .font(.title)
+            
+            Button("Log Action") {
+                LoggingManager.shared.logUserAction(
+                    action: "User tapped the action button",
+                    metadata: ["button": "Action"]
+                )
+            }
+            
+            Button("Log Error") {
+                let sampleError = NSError(
+                    domain: "com.georocks.error",
+                    code: 404,
+                    userInfo: [NSLocalizedDescriptionKey: "Sample not found"]
+                )
+                LoggingManager.shared.logError(error: sampleError)
+            }
+            
+            Button("Log Debug") {
+                LoggingManager.shared.logDebug(
+                    message: "Debugging the logger functionality",
+                    metadata: ["level": "verbose"]
+                )
+            }
+        }
+        .padding()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Models/RockDetailDto.swift
+---
+    //
+    //  RockDetailDto.swift
+    //  GeoRocksIOS
+    //
+    //  Created by Carlos Ignacio Padilla Herrera on 23/12/24.
+    //
+
+    import Foundation
+
+    struct RockDetailDto: Decodable {
+        
+        // The title of the rock is stored
+        let title: String?
+        
+        // The image URL of the rock is stored
+        let image: String?
+        
+        // The video URL related to the rock is stored
+        let video: String?
+        
+        // A long description of the rock is stored
+        let longDesc: String?
+        
+        // The category or group the rock is a member of is stored
+        let aMemberOf: String?
+        
+        // Alternate names for the rock are stored
+        let alsoKnownAs: [String]?
+        
+        // The chemical formula of the rock is stored
+        let formula: String?
+        
+        // The hardness of the rock is stored
+        let hardness: Int?
+        
+        // The color description of the rock is stored
+        let color: String?
+        
+        // Indicates whether the rock is magnetic
+        let magnetic: Bool?
+        
+        // The latitude coordinate of the rock's locality is stored
+        let latitude: Double?
+        
+        // The longitude coordinate of the rock's locality is stored
+        let longitude: Double?
+        
+        // Health risks associated with the rock are stored
+        let healthRisks: String?
+        
+        // Additional images of the rock are stored
+        let images: [String]?
+        
+        // Locations where the rock is found are stored
+        let localities: [String]?
+        
+        // Frequently asked questions about the rock are stored
+        let frequentlyAskedQuestions: [String]?
+        
+        // Physical properties of the rock are stored
+        let physicalProperties: PhysicalProperties?
+        
+        // Chemical properties of the rock are stored
+        let chemicalProperties: ChemicalProperties?
+        
+        // MARK: - CodingKeys
+        enum CodingKeys: String, CodingKey {
+            case title
+            case image
+            case video
+            case longDesc = "long_desc"
+            case aMemberOf = "a_member_of"
+            case alsoKnownAs = "also_known_as"
+            case formula
+            case hardness
+            case color
+            case magnetic
+            case latitude
+            case longitude
+            case healthRisks = "health_risks"
+            case images
+            case localities
+            case frequentlyAskedQuestions = "frequently_asked_questions"
+            case physicalProperties = "physical_properties"
+            case chemicalProperties = "chemical_properties"
+        }
+        
+        // MARK: - PhysicalProperties
+        struct PhysicalProperties: Decodable {
+            // The crystal system of the rock is stored
+            let ppCrystalSystem: String?
+            
+            // The colors associated with the rock are stored
+            let ppColors: [String]?
+            
+            // The luster of the rock is stored
+            let ppLuster: String?
+            
+            // The diaphaneity (transparency) of the rock is stored
+            let ppDiaphaneity: String?
+            
+            // The streak color of the rock is stored
+            let ppStreak: String?
+            
+            // The tenacity of the rock is stored
+            let ppTenacity: String?
+            
+            // The cleavage of the rock is stored
+            let ppCleavage: String?
+            
+            // The fracture pattern of the rock is stored
+            let ppFracture: String?
+            
+            // The density of the rock is stored
+            let ppDensity: String?
+            
+            // The hardness value of the rock is stored
+            let ppHardness: Int?
+            
+            // Indicates whether the rock is magnetic
+            let ppMagnetic: Bool?
+            
+            enum CodingKeys: String, CodingKey {
+                case ppCrystalSystem = "pp_crystal_system"
+                case ppColors = "pp_colors"
+                case ppLuster = "pp_luster"
+                case ppDiaphaneity = "pp_diaphaneity"
+                case ppStreak = "pp_streak"
+                case ppTenacity = "pp_tenacity"
+                case ppCleavage = "pp_cleavage"
+                case ppFracture = "pp_fracture"
+                case ppDensity = "pp_density"
+                case ppHardness = "pp_hardness"
+                case ppMagnetic = "pp_magnetic"
+            }
+        }
+        
+        // MARK: - ChemicalProperties
+        struct ChemicalProperties: Decodable {
+            // The chemical classification of the rock is stored
+            let chemicalClassification: String?
+            
+            // The chemical formula of the rock is stored
+            let cpFormula: String?
+            
+            // Elements listed in the rock's composition are stored
+            let cpElementsListed: [String]?
+            
+            // Common impurities found in the rock are stored
+            let cpCommonImpurities: [String]?
+            
+            enum CodingKeys: String, CodingKey {
+                case chemicalClassification = "cp_chemical_classification"
+                case cpFormula = "cp_formula"
+                case cpElementsListed = "cp_elements_listed"
+                case cpCommonImpurities = "cp_common_impurities"
+            }
+        }
+    }
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Models/RockDto.swift
+---
+// RockDto.swift
+import Foundation
+
+/// A data structure representing a rock object.
+/// The properties have been made optional if they are not always present.
+struct RockDto: Identifiable, Codable {
+    let id: String
+    let thumbnail: String?
+    let title: String
+    
+    // Additional fields
+    let color: String?
+    let hardness: Int?
+    let formula: String?
+    let shortDescription: String?
+    let latitude: Double?
+    let longitude: Double?
+}
+
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Models/UserProfile.swift
+---
+// -----------------------------------------------------------
+//  UserProfile.swift
+//  GeoRocksIOS
+//  Author: Carlos Ignacio Padilla Herrera
+//  Created: 12/12/2024
+//  Last Updated: 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file contains a refined model for user profile data.
+// It follows best practices for data handling and includes
+// senior-level software engineering comments.
+// -----------------------------------------------------------
+
+import Foundation
+
+/// A high-level representation of a user’s profile within GeoRocksIOS.
+/// It stores essential personal data such as username, email, optional
+/// profile pictures, and contact details. The model is designed for
+/// easy extension and maintenance.
+struct UserProfile: Codable {
+    
+    /// A unique username that identifies the user within the GeoRocksIOS app.
+    let username: String
+    
+    /// The email address used for authentication and communication.
+    let email: String
+    
+    /// An optional string containing a URL to the user's profile picture.
+    /// If provided, it is intended to point to a secure, accessible location.
+    let profilePictureURL: String?
+    
+    /// An optional contact number that can be used for account recovery or
+    /// additional user verification processes.
+    let phoneNumber: String?
+    
+    // MARK: - Initializer
+    
+    /// A designated initializer that sets up the user’s profile.
+    /// - Parameters:
+    ///   - username: The user’s chosen identifier.
+    ///   - email: The user’s valid email address.
+    ///   - profilePictureURL: An optional URL referencing the user’s profile image.
+    ///   - phoneNumber: An optional contact number for the user.
+    ///
+    /// This initializer can be expanded as more fields are required by the app.
+    init(username: String,
+         email: String,
+         profilePictureURL: String? = nil,
+         phoneNumber: String? = nil) {
+        self.username = username
+        self.email = email
+        self.profilePictureURL = profilePictureURL
+        self.phoneNumber = phoneNumber
+    }
+    
+    // MARK: - Future Enhancements
+    
+    /// Additional attributes and associated properties can be added here in the future,
+    /// such as address details, social media handles, or preference flags. Each new field
+    /// should be carefully integrated to maintain backward compatibility for existing users.
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/GeoRocksIOSApp.swift
+---
+// -----------------------------------------------------------
+// GeoRocksIOSApp.swift (Adapted)
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file configures the main SwiftUI App. It now displays
+// a TabView for authenticated users, combining RocksListView
+// and a FeatureLauncherView that demonstrates features 4-10.
+// -----------------------------------------------------------
+
+import SwiftUI
+import Firebase
+
+@main
+struct GeoRocksIOSApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
+    @StateObject private var authViewModel = AuthViewModel()
+    @StateObject private var rocksViewModel = RocksViewModel()
+    @StateObject private var settingsViewModel = SettingsViewModel()
+    @StateObject private var accountSettingsViewModel = AccountSettingsViewModel()
+    
+    @AppStorage("isDarkMode") private var isDarkMode: Bool = false
+    @State private var isLoading: Bool = true
+    
+    var body: some Scene {
+        WindowGroup {
+            Group {
+                if isLoading {
+                    LoadingView()
+                        .onAppear {
+                            authViewModel.checkAuthenticationStatus { _ in
+                                isLoading = false
+                            }
+                        }
+                }
+                else if authViewModel.isLoggedIn {
+                    // A tab-based approach merges RocksListView with FeatureLauncherView:
+                    TabView {
+                        // First Tab: RocksListView
+                        RocksListView()
+                            .environmentObject(authViewModel)
+                            .environmentObject(rocksViewModel)
+                            .environmentObject(settingsViewModel)
+                            .environmentObject(accountSettingsViewModel)
+                            .tabItem {
+                                Label("Rocks", systemImage: "list.bullet")
+                            }
+                        
+                        // Second Tab: FeatureLauncherView for push notifications, local notifications, etc.
+                        FeatureLauncherView()
+                            .environmentObject(authViewModel)
+                            .environmentObject(rocksViewModel)
+                            .environmentObject(settingsViewModel)
+                            .environmentObject(accountSettingsViewModel)
+                            .tabItem {
+                                Label("Features", systemImage: "star.fill")
+                            }
+                    }
+                }
+                else {
+                    NavigationView {
+                        LoginView()
+                            .environmentObject(authViewModel)
+                            .environmentObject(rocksViewModel)
+                            .environmentObject(settingsViewModel)
+                            .environmentObject(accountSettingsViewModel)
+                    }
+                }
+            }
+            .preferredColorScheme(isDarkMode ? .dark : .light)
+            .alert(isPresented: Binding<Bool>(
+                get: { authViewModel.errorMessage != nil },
+                set: { _ in authViewModel.errorMessage = nil }
+            )) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(authViewModel.errorMessage ?? "An unknown error occurred."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+}
+
+/// A loading view that appears while authentication status is verified.
+struct LoadingView: View {
+    var body: some View {
+        VStack {
+            ProgressView("Loading...")
+                .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                .scaleEffect(1.5)
+                .padding()
+        }
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+    }
+}
+
+/// The existing preview provider remains unchanged.
+struct GeoRocksIOSApp_Previews: PreviewProvider {
+    static var previews: some View {
+        RocksListView()
+            .environmentObject(AuthViewModel())
+            .environmentObject(RocksViewModel())
+            .environmentObject(SettingsViewModel())
+            .environmentObject(AccountSettingsViewModel())
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/MainRocksView.swift
+---
+//
+//  MainRocksView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2023.
+//
+
+import SwiftUI
+
+struct MainRocksView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
+    var body: some View {
+        NavigationView {
+            RocksListView()
+                .navigationBarTitle("GeoRocks")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(action: {
+                            authViewModel.signOut()
+                        }) {
+                            Text("Logout")
+                        }
+                    }
+                }
+        }
+    }
+}
+
+struct MainRocksView_Previews: PreviewProvider {
+    static var previews: some View {
+        MainRocksView()
+            .environmentObject(AuthViewModel())
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/FavoritesView.swift
+---
+//
+//  FavoritesView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+//  Description:
+//  The FavoritesView displays a list of rocks that have been marked as favorites by the user.
+//  Users can navigate to this view to easily access their preferred rocks.
+//
+
+import SwiftUI
+
+struct FavoritesView: View {
+    @EnvironmentObject var rocksViewModel: RocksViewModel // Accesses the shared RocksViewModel
+    
+    var body: some View {
+        VStack {
+            // Title for the Favorites section
+            Text("Your Favorite Rocks")
+                .font(.largeTitle)
+                .fontWeight(.bold)
+                .foregroundColor(Color("DefaultTextColor"))
+                .padding(.top, 20)
+            
+            // Checks if there are any favorites
+            if rocksViewModel.favoriteRockIDs.isEmpty {
+                // Message displayed when no favorites are selected
+                Text("You have not added any rocks to your favorites yet.")
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
+            else {
+                // List of favorite rocks is displayed
+                List {
+                    ForEach(rocksViewModel.rocks.filter { rocksViewModel.isFavorite(rock: $0) }) { rock in
+                        NavigationLink(destination: RockDetailView(rockId: rock.id)) {
+                            HStack(spacing: 12) {
+                                // Thumbnail image for the rock
+                                if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
+                                    AsyncImage(url: url) { phase in
+                                        switch phase {
+                                        case .empty:
+                                            // Placeholder while the image is loading
+                                            Color.gray
+                                                .frame(width: 50, height: 50)
+                                                .overlay(
+                                                    ProgressView()
+                                                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                                )
+                                        case .success(let image):
+                                            // Successfully loaded image
+                                            image
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 50, height: 50)
+                                                .clipped()
+                                        case .failure:
+                                            // Placeholder for failed image loading
+                                            Color.red
+                                                .frame(width: 50, height: 50)
+                                                .overlay(
+                                                    Image(systemName: "photo")
+                                                        .foregroundColor(.white)
+                                                )
+                                        @unknown default:
+                                            // Fallback for any unknown cases
+                                            Color.gray
+                                                .frame(width: 50, height: 50)
+                                        }
+                                    }
+                                    .cornerRadius(8)
+                                    .shadow(radius: 3)
+                                } else {
+                                    // Placeholder for missing image
+                                    Color.gray
+                                        .frame(width: 50, height: 50)
+                                        .cornerRadius(8)
+                                        .shadow(radius: 3)
+                                }
+                                
+                                // Rock title with improved typography
+                                Text(rock.title)
+                                    .font(.headline)
+                                    .foregroundColor(Color("DefaultTextColor"))
+                                    .lineLimit(1)
+                                
+                                Spacer()
+                                
+                                // Unfavorite button to remove the rock from favorites
+                                Button(action: {
+                                    rocksViewModel.toggleFavorite(rock: rock)
+                                }) {
+                                    Image(systemName: "heart.fill")
+                                        .foregroundColor(.red)
+                                }
+                                .buttonStyle(BorderlessButtonStyle()) // Ensures the button works inside the list
+                            }
+                            .padding(.vertical, 6)
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                            .shadow(radius: 3)
+                            .padding(.horizontal)
+                        }
+                    }
+                }
+                .listStyle(PlainListStyle())
+                .background(Color("BackgroundColor"))
+            }
+            
+            Spacer()
+        }
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all)) // Sets the background color
+        .navigationTitle("Favorites") // Sets the navigation title
+    }
+    
+    struct FavoritesView_Previews: PreviewProvider {
+        static var previews: some View {
+            FavoritesView()
+                .environmentObject(RocksViewModel()) // Provides the RocksViewModel for preview
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/RocksListView.swift
+---
+// -----------------------------------------------------------
+// RocksListView.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file displays a list of rocks fetched from a remote source.
+// It allows sorting, searching, and toggling favorites. The local
+// cache engine is also integrated for offline capabilities.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+struct RocksListView: View {
+    // These @EnvironmentObjects provide data and state from shared ViewModels.
+    @EnvironmentObject var rocksViewModel: RocksViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @EnvironmentObject var settingsViewModel: SettingsViewModel
+    @EnvironmentObject var accountSettingsViewModel: AccountSettingsViewModel
+    
+    // These @State properties manage UI states, including search text and sort options.
+    @State private var searchText: String = ""
+    @State private var sortOption: SortOption = .ascending
+    @State private var showingSettings = false
+    @State private var showingAccountSettings = false
+    @State private var showingAddRock = false
+    
+    var body: some View {
+        NavigationView {
+            VStack {
+                // The main content is grouped to handle loading/error states.
+                Group {
+                    if rocksViewModel.isLoading {
+                        // A progress indicator is displayed while data is being fetched.
+                        ProgressView("Loading Rocks...")
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                            .scaleEffect(1.5)
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                            .shadow(radius: 5)
+                    } else if let errorMessage = rocksViewModel.errorMessage {
+                        // An error message is shown if the fetch fails.
+                        Text("Error: \(errorMessage)")
+                            .foregroundColor(.red)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                            .shadow(radius: 5)
+                    } else {
+                        // A list is displayed if rocks are successfully loaded.
+                        List {
+                            Section(header: SearchBar(text: $searchText)) {
+                                // The user can pick a sort option via segmented control.
+                                Picker("Sort By", selection: $sortOption) {
+                                    ForEach(SortOption.allCases) { option in
+                                        Text(option.rawValue).tag(option)
+                                    }
+                                }
+                                .pickerStyle(SegmentedPickerStyle())
+                                .padding(.vertical, 5)
+                                .onChange(of: sortOption) { _ in
+                                    rocksViewModel.sortRocks(option: sortOption)
+                                }
+                                
+                                // Filtered and sorted rocks are iterated to display each item.
+                                ForEach(rocksViewModel.filteredAndSortedRocks(searchText: searchText)) { rock in
+                                    NavigationLink(destination: RockDetailView(rockId: rock.id)) {
+                                        HStack(spacing: 12) {
+                                            // A thumbnail image is loaded asynchronously, if available.
+                                            if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
+                                                AsyncImage(url: url) { phase in
+                                                    switch phase {
+                                                    case .empty:
+                                                        // A placeholder is shown while the image is loading.
+                                                        Color.gray
+                                                            .frame(width: 50, height: 50)
+                                                            .overlay(
+                                                                ProgressView()
+                                                                    .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                                            )
+                                                    case .success(let image):
+                                                        // The loaded image is displayed.
+                                                        image
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 50, height: 50)
+                                                            .clipped()
+                                                    case .failure:
+                                                        // A fallback is shown if the image fails to load.
+                                                        Color.red
+                                                            .frame(width: 50, height: 50)
+                                                            .overlay(
+                                                                Image(systemName: "photo")
+                                                                    .foregroundColor(.white)
+                                                            )
+                                                    @unknown default:
+                                                        // This fallback handles any unknown cases.
+                                                        Color.gray
+                                                            .frame(width: 50, height: 50)
+                                                    }
+                                                }
+                                                .cornerRadius(8)
+                                                .shadow(radius: 3)
+                                            } else {
+                                                // A gray box is shown if no thumbnail is available.
+                                                Color.gray
+                                                    .frame(width: 50, height: 50)
+                                                    .cornerRadius(8)
+                                                    .shadow(radius: 3)
+                                            }
+                                            
+                                            // The rock's title is shown.
+                                            Text(rock.title)
+                                                .font(.headline)
+                                                .foregroundColor(Color("DefaultTextColor"))
+                                                .lineLimit(1)
+                                            
+                                            Spacer()
+                                            
+                                            // A heart icon is used to toggle favorites.
+                                            Button(action: {
+                                                rocksViewModel.toggleFavorite(rock: rock)
+                                            }) {
+                                                Image(systemName: rocksViewModel.isFavorite(rock: rock) ? "heart.fill" : "heart")
+                                                    .foregroundColor(rocksViewModel.isFavorite(rock: rock) ? .red : .gray)
+                                            }
+                                            .buttonStyle(BorderlessButtonStyle())
+                                        }
+                                        .padding(.vertical, 6)
+                                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                                        .shadow(radius: 3)
+                                        .padding(.horizontal)
+                                    }
+                                }
+                            }
+                        }
+                        .listStyle(PlainListStyle())
+                        .background(Color("BackgroundColor"))
+                        // A pull-to-refresh is added to re-fetch rocks if needed.
+                        .refreshable {
+                            rocksViewModel.fetchRocks()
+                        }
+                    }
+                }
+                .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+                // The list is labeled with a navigation title.
+                .navigationTitle("Rocks List")
+                .toolbar {
+                    // The leading toolbar contains a button to add new rocks locally.
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(action: {
+                            showingAddRock = true
+                        }) {
+                            Image(systemName: "plus")
+                                .foregroundColor(Color("ButtonDefault"))
+                        }
+                        .sheet(isPresented: $showingAddRock) {
+                            AddRockView()
+                                .environmentObject(rocksViewModel)
+                        }
+                    }
+                    
+                    // The trailing toolbar provides access to settings, account, and sign out.
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        HStack(spacing: 20) {
+                            Button(action: {
+                                showingSettings.toggle()
+                            }) {
+                                Image(systemName: "gearshape")
+                                    .foregroundColor(Color("ButtonDefault"))
+                            }
+                            .sheet(isPresented: $showingSettings) {
+                                SettingsView()
+                            }
+                            
+                            Button(action: {
+                                showingAccountSettings.toggle()
+                            }) {
+                                Image(systemName: "person.circle")
+                                    .foregroundColor(Color("ButtonDefault"))
+                            }
+                            // The correct AccountSettingsView is presented here.
+                            .sheet(isPresented: $showingAccountSettings) {
+                                AccountSettingsView()
+                                    .environmentObject(accountSettingsViewModel)
+                            }
+                            
+                            Button(action: {
+                                authViewModel.signOut()
+                            }) {
+                                Image(systemName: "power")
+                                    .foregroundColor(Color("ButtonDefault"))
+                            }
+                        }
+                    }
+                }
+                // Rocks are fetched as soon as the view appears.
+                .onAppear {
+                    rocksViewModel.fetchRocks()
+                }
+                
+                // **Se ha eliminado el VStack de botones de caché**
+            }
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/AddRockView.swift
+---
+// -----------------------------------------------------------
+//  AddRockView.swift
+//  GeoRocksIOS
+//  Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+//  Description:
+//  This file allows users to enter detailed information
+//  for a new rock. After validation, the rock is saved
+//  to local storage, and the user is navigated to a detail view.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+struct AddRockView: View {
+    @EnvironmentObject var rocksViewModel: RocksViewModel
+    
+    @State private var rockTitle: String = ""
+    @State private var rockThumbnailURL: String = ""
+    @State private var rockColor: String = ""
+    @State private var rockHardness: String = ""
+    @State private var rockFormula: String = ""
+    @State private var rockShortDescription: String = ""
+    @State private var rockLatitude: String = ""
+    @State private var rockLongitude: String = ""
+    
+    @State private var showAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // A state property is used for programmatic navigation.
+    @State private var navigateToDetail: Bool = false
+    
+    // A state property is used to store the newly created rock for passing its ID to the detail view.
+    @State private var newlyCreatedRock: RockDto? = nil
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Rock Information")) {
+                    TextField("Enter Rock Title", text: $rockTitle)
+                    TextField("Enter Thumbnail URL", text: $rockThumbnailURL)
+                    TextField("Enter Color", text: $rockColor)
+                    TextField("Enter Hardness (1-10)", text: $rockHardness)
+                    TextField("Enter Formula", text: $rockFormula)
+                    TextField("Enter Short Description", text: $rockShortDescription)
+                }
+                
+                Section(header: Text("Location (Optional)")) {
+                    TextField("Enter Latitude", text: $rockLatitude)
+                    TextField("Enter Longitude", text: $rockLongitude)
+                }
+                
+                Button(action: {
+                    addRock()
+                }) {
+                    Text("Add Rock")
+                        .fontWeight(.semibold)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.cornerRadius(8))
+                }
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Validation Error"),
+                        message: Text(alertMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+            }
+            .navigationTitle("Add New Rock")
+            .background(
+                // A hidden NavigationLink is used for programmatic navigation.
+                NavigationLink(
+                    destination: Group {
+                        if let rock = newlyCreatedRock {
+                            // RockDetailView(rockId:) is assumed, accepting a String
+                            RockDetailView(rockId: rock.id)
+                        } else {
+                            Text("No Rock to display.")
+                        }
+                    },
+                    isActive: $navigateToDetail,
+                    label: {
+                        EmptyView()
+                    }
+                )
+                .hidden()
+            )
+        }
+    }
+    
+    /// A new rock is created and saved, then the view navigates to the rock detail.
+    private func addRock() {
+        // A minimal validation check is performed.
+        guard !rockTitle.isEmpty else {
+            alertMessage = "A rock title is required."
+            showAlert = true
+            return
+        }
+        
+        // Strings are converted to numeric values if possible.
+        let hardnessValue: Int? = Int(rockHardness)
+        let latitudeValue: Double? = Double(rockLatitude)
+        let longitudeValue: Double? = Double(rockLongitude)
+        
+        // A new RockDto object is constructed with a unique ID.
+        let newRock = RockDto(
+            id: UUID().uuidString,
+            thumbnail: rockThumbnailURL.isEmpty ? nil : rockThumbnailURL,
+            title: rockTitle,
+            color: rockColor.isEmpty ? nil : rockColor,
+            hardness: hardnessValue,
+            formula: rockFormula.isEmpty ? nil : rockFormula,
+            shortDescription: rockShortDescription.isEmpty ? nil : rockShortDescription,
+            latitude: latitudeValue,
+            longitude: longitudeValue
+        )
+        
+        // The new rock is appended to the ViewModel, which performs local saving.
+        rocksViewModel.addRock(newRock)
+        
+        // Text fields are cleared for convenience.
+        rockTitle = ""
+        rockThumbnailURL = ""
+        rockColor = ""
+        rockHardness = ""
+        rockFormula = ""
+        rockShortDescription = ""
+        rockLatitude = ""
+        rockLongitude = ""
+        
+        // The newly created rock is stored, and navigation is triggered to the detail view.
+        newlyCreatedRock = newRock
+        navigateToDetail = true
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/LoginView.swift
+---
+//
+//  LoginView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+
+import SwiftUI
+
+struct LoginView: View {
+    // The AuthViewModel is accessed from the environment
+    @EnvironmentObject var authViewModel: AuthViewModel
+
+    // State variables are used to store the user's email and password input
+    @State private var email: String = ""
+    @State private var password: String = ""
+    
+    // State variables for controlling alerts
+    @State private var showErrorAlert: Bool = false
+    @State private var showSuccessAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // State variable to manage loading state
+    @State private var isLoading: Bool = false
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                // Background Color
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 30) {
+                    // AppIcon Image (Added logo above the title)
+                    Image("Logo") // "Logo" is the name of your logo in Assets.xcassets
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 100, height: 100) // Adjust size as needed
+                        .padding(.top, 50)
+                    
+                    // The title "GeoRocks UNAM" is displayed with a large font
+                    Text("GeoRocks UNAM")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("DefaultTextColor")) // Custom color
+                    
+                    VStack(spacing: 15) {
+                        // An email input field is provided for the user
+                        TextField("Email", text: $email)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                            .autocapitalization(.none) // Automatic capitalization is disabled
+                            .disableAutocorrection(true) // Automatic correction is disabled
+                            .keyboardType(.emailAddress)
+                            .padding(.horizontal, 20)
+                            .background(Color("DefaultBackground"))
+                            .cornerRadius(8)
+                        
+                        // A password input field is provided for the user
+                        SecureField("Password", text: $password)
+                            .textFieldStyle(RoundedBorderTextFieldStyle()) // A rounded border style is applied
+                            .padding(.horizontal, 20)
+                            .background(Color("DefaultBackground"))
+                            .cornerRadius(8)
+                    }
+                    
+                    // A button labeled "Sign In" is provided to initiate the sign-in process
+                    Button(action: {
+                        signIn()
+                    }) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color.white))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                        } else {
+                            Text("Sign In")
+                                .fontWeight(.semibold) // The text is given a semi-bold font weight
+                                .frame(maxWidth: .infinity) // The button expands to the maximum available width
+                                .padding()
+                                .background(Color("ButtonDefault")) // Custom button color
+                                .foregroundColor(.white) // The text color is set to white
+                                .cornerRadius(8) // Rounded corners
+                        }
+                    }
+                    .disabled(isLoading)
+                    .buttonStyle(CustomButtonStyle()) // Apply custom button style
+                    
+                    // NavigationLink to CreateAccountView
+                    NavigationLink(destination: CreateAccountView()) {
+                        Text("Create Account")
+                            .fontWeight(.semibold) // The text is given a semi-bold font weight
+                            .foregroundColor(Color("ButtonDefault")) // Custom color matching button
+                    }
+                    
+                    // NavigationLink to ForgotPasswordView
+                    NavigationLink(destination: ForgotPasswordView()) {
+                        Text("Forgot your password?")
+                            .foregroundColor(Color("ButtonDefault")) // The text color is set to custom color
+                            .underline() // The text is underlined
+                    }
+                    
+                    Spacer() // A spacer is added to push the content upwards
+                }
+                .padding(.horizontal, 32) // Horizontal padding is applied to the entire VStack
+            }
+            .navigationBarHidden(true) // The navigation bar is hidden for this view
+            .navigationBarTitle("") // The navigation bar title is set to an empty string
+            // Observe changes in AuthViewModel's errorMessage and successMessage
+            .onReceive(authViewModel.$errorMessage) { error in
+                if let error = error {
+                    alertMessage = error
+                    showErrorAlert = true
+                }
+            }
+            .onReceive(authViewModel.$successMessage) { success in
+                if let success = success {
+                    alertMessage = success
+                    showSuccessAlert = true
+                }
+            }
+            // Present error alert
+            .alert(isPresented: $showErrorAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        authViewModel.clearMessages()
+                    }
+                )
+            }
+            // Present success alert
+            .alert(isPresented: $showSuccessAlert) {
+                Alert(
+                    title: Text("Success"),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        authViewModel.clearMessages()
+                    }
+                )
+            }
+        }
+    }
+    
+    // MARK: - Sign In Function
+    private func signIn() {
+        // Input Validation
+        guard !email.isEmpty, !password.isEmpty else {
+            alertMessage = "Please enter both email and password."
+            showErrorAlert = true
+            return
+        }
+        
+        // Optionally, add more validation (e.g., email format)
+        
+        // Set loading state
+        isLoading = true
+        
+        // Call AuthViewModel's signIn function
+        authViewModel.signIn(email: email, password: password)
+        
+        // Reset loading state after a delay to allow AuthViewModel to process
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isLoading = false
+        }
+    }
+    
+    // MARK: - Custom Button Style
+    struct CustomButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .background(
+                    configuration.isPressed ?
+                    Color("ButtonPressed") :
+                    Color("ButtonDefault")
+                )
+                .cornerRadius(8)
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+        }
+    }
+
+    struct LoginView_Previews: PreviewProvider {
+        static var previews: some View {
+            // A preview of the LoginView is provided with an instance of AuthViewModel
+            LoginView()
+                .environmentObject(AuthViewModel())
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/RockDetailView.swift
+---
+// RockDetailView.swift
+// GeoRocksIOS
+
+import SwiftUI
+import AVKit
+import MapKit
+
+struct InfoRow: View {
+    let title: String
+    let value: String
+    
+    var body: some View {
+        HStack {
+            Text("\(title):")
+                .font(.body)
+                .fontWeight(.semibold)
+                .foregroundColor(Color("DefaultTextColor"))
+            Spacer()
+            Text(value)
+                .font(.body)
+                .foregroundColor(Color("DefaultTextColor"))
+                .multilineTextAlignment(.trailing)
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct RockDetailView: View {
+    let rockId: String
+    
+    @StateObject var detailViewModel = RockDetailViewModel()
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                if detailViewModel.isLoading {
+                    ProgressView("Loading rock details...")
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                        .scaleEffect(1.5)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("CoffeeBackground")))
+                        .shadow(radius: 5)
+                } else if let error = detailViewModel.error {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding()
+                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("CoffeeBackground")))
+                        .shadow(radius: 5)
+                } else if let detail = detailViewModel.rockDetail {
+                    Text(detail.title ?? "Rock Details")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .multilineTextAlignment(.center)
+                        .foregroundColor(Color("DefaultTextColor"))
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    
+                    if let alsoKnownAs = detail.alsoKnownAs, !alsoKnownAs.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Also Known As")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            
+                            ForEach(alsoKnownAs, id: \.self) { name in
+                                Text("• \(name)")
+                                    .font(.subheadline)
+                                    .foregroundColor(Color("DefaultTextColor"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let imageUrl = detail.image, let url = URL(string: imageUrl) {
+                        AsyncImage(url: url) { phase in
+                            switch phase {
+                            case .empty:
+                                Color.gray
+                                    .aspectRatio(16/9, contentMode: .fit)
+                                    .overlay(
+                                        ProgressView()
+                                            .progressViewStyle(
+                                                CircularProgressViewStyle(tint: Color("ButtonDefault"))
+                                            )
+                                    )
+                            case .success(let image):
+                                image
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: UIScreen.main.bounds.width * 0.9, height: 250)
+                                    .clipped()
+                            case .failure:
+                                Color.red
+                                    .aspectRatio(16/9, contentMode: .fit)
+                                    .overlay(
+                                        Image(systemName: "photo")
+                                            .foregroundColor(.white)
+                                            .font(.largeTitle)
+                                    )
+                            @unknown default:
+                                Color.gray
+                                    .aspectRatio(16/9, contentMode: .fit)
+                            }
+                        }
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let description = detail.longDesc {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(description)
+                                .font(.body)
+                                .foregroundColor(Color("DefaultTextColor"))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let lat = detail.latitude, let lon = detail.longitude {
+                        VStack {
+                            MapView(lat: lat, lon: lon)
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .shadow(radius: 5)
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let videoURLString = detail.video,
+                       let videoURL = URL(string: videoURLString) {
+                        VStack {
+                            VideoPlayer(player: AVPlayer(url: videoURL))
+                                .frame(height: 200)
+                                .cornerRadius(10)
+                                .shadow(radius: 5)
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        InfoRow(title: "Type", value: detail.aMemberOf ?? "N/A")
+                        InfoRow(title: "Color", value: detail.color ?? "N/A")
+                        InfoRow(title: "Formula", value: detail.formula ?? "N/A")
+                        InfoRow(title: "Hardness", value: "\(detail.hardness ?? 0)")
+                        InfoRow(title: "Magnetic", value: detail.magnetic == true ? "Yes" : "No")
+                    }
+                    .padding()
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
+                    .padding(.horizontal)
+                    
+                    if let physicalProperties = detail.physicalProperties {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Physical Properties")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            
+                            InfoRow(title: "Crystal System", value: physicalProperties.ppCrystalSystem ?? "N/A")
+                            InfoRow(title: "Colors", value: physicalProperties.ppColors?.joined(separator: ", ") ?? "N/A")
+                            InfoRow(title: "Luster", value: physicalProperties.ppLuster ?? "N/A")
+                            InfoRow(title: "Diaphaneity", value: physicalProperties.ppDiaphaneity ?? "N/A")
+                            InfoRow(title: "Streak", value: physicalProperties.ppStreak ?? "N/A")
+                            InfoRow(title: "Tenacity", value: physicalProperties.ppTenacity ?? "N/A")
+                            InfoRow(title: "Cleavage", value: physicalProperties.ppCleavage ?? "N/A")
+                            InfoRow(title: "Fracture", value: physicalProperties.ppFracture ?? "N/A")
+                            InfoRow(title: "Density", value: physicalProperties.ppDensity ?? "N/A")
+                            InfoRow(title: "Hardness (Physical)", value: "\(physicalProperties.ppHardness ?? 0)")
+                            InfoRow(title: "Magnetic (Physical)", value: physicalProperties.ppMagnetic == true ? "Yes" : "No")
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let chemicalProperties = detail.chemicalProperties {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Chemical Properties")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            
+                            InfoRow(title: "Chemical Classification", value: chemicalProperties.chemicalClassification ?? "N/A")
+                            InfoRow(title: "Formula (Chemical)", value: chemicalProperties.cpFormula ?? "N/A")
+                            if let elementsListed = chemicalProperties.cpElementsListed, !elementsListed.isEmpty {
+                                InfoRow(title: "Elements Listed", value: elementsListed.joined(separator: ", "))
+                            } else {
+                                InfoRow(title: "Elements Listed", value: "N/A")
+                            }
+                            if let commonImpurities = chemicalProperties.cpCommonImpurities, !commonImpurities.isEmpty {
+                                InfoRow(title: "Common Impurities", value: commonImpurities.joined(separator: ", "))
+                            } else {
+                                InfoRow(title: "Common Impurities", value: "N/A")
+                            }
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let healthRisks = detail.healthRisks, !healthRisks.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Health Risks")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            Text(healthRisks)
+                                .font(.subheadline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let additionalImages = detail.images, !additionalImages.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Additional Images")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 16) {
+                                    ForEach(additionalImages, id: \.self) { imageURL in
+                                        if let url = URL(string: imageURL) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .empty:
+                                                    ProgressView()
+                                                        .progressViewStyle(
+                                                            CircularProgressViewStyle(tint: Color("ButtonDefault"))
+                                                        )
+                                                        .frame(width: 120, height: 80)
+                                                        .background(Color.gray)
+                                                        .cornerRadius(8)
+                                                case .success(let image):
+                                                    image
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 120, height: 80)
+                                                        .clipped()
+                                                        .cornerRadius(8)
+                                                case .failure:
+                                                    Image(systemName: "photo")
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 120, height: 80)
+                                                        .foregroundColor(.white)
+                                                        .background(Color.red)
+                                                        .cornerRadius(8)
+                                                @unknown default:
+                                                    EmptyView()
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding(.vertical, 4)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let localities = detail.localities, !localities.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Localities")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            ForEach(localities, id: \.self) { locality in
+                                Text("• \(locality)")
+                                    .font(.subheadline)
+                                    .foregroundColor(Color("DefaultTextColor"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal)
+                    }
+                    
+                    if let faqs = detail.frequentlyAskedQuestions, !faqs.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Frequently Asked Questions")
+                                .font(.headline)
+                                .foregroundColor(Color("DefaultTextColor"))
+                            ForEach(faqs, id: \.self) { faq in
+                                Text("• \(faq)")
+                                    .font(.subheadline)
+                                    .foregroundColor(Color("DefaultTextColor"))
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                        .padding()
+                        .background(
+                            LinearGradient(
+                                gradient: Gradient(colors: [Color("CoffeeBackground"), Color("ButtonDefault")]),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                        .cornerRadius(10)
+                        .shadow(radius: 5)
+                        .padding(.horizontal, 32)
+                    }
+                    
+                    ShareRockFeature(
+                        rockTitle: detail.title ?? "",
+                        rockDetails: detail.longDesc ?? "No details available"
+                    )
+                    .padding(.top, 16)
+                }
+            }
+            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+            .onAppear {
+                detailViewModel.fetchRockDetail(rockId: rockId)
+            }
+            .alert(isPresented: Binding<Bool>(
+                get: { self.detailViewModel.error != nil },
+                set: { _ in self.detailViewModel.error = nil }
+            )) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(detailViewModel.error ?? "An unknown error occurred."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+}
+
+struct RockDetailView_Previews: PreviewProvider {
+    static var previews: some View {
+        RockDetailView(rockId: "1")
+            .environmentObject(AuthViewModel())
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/MapView.swift
+---
+//
+//  MapView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+//  Description:
+//  An interactive SwiftUI view that displays a map centered on specified coordinates.
+//  Custom annotations are rendered using the latest MapKit APIs compatible with iOS 17.
+//
+//  Updates:
+//  - Deprecated initializers and annotations have been replaced with MapContentBuilder and Annotation.
+//  - Enhanced comments have been added for easier debugging and maintenance.
+//  - Compatibility has been ensured with iOS 17 or later.
+//
+
+import SwiftUI
+import MapKit
+
+/// Model representing a custom annotation for the map
+struct RockAnnotation: Identifiable {
+    let id = UUID() // A unique identifier for the annotation
+    let coordinate: CLLocationCoordinate2D // The coordinates of the annotation
+}
+
+struct MapView: View {
+    let lat: Double // The latitude to center the map
+    let lon: Double // The longitude to center the map
+
+    @State private var cameraPosition: MapCameraPosition // The camera position state
+
+    // An array of annotations to be displayed on the map
+    let annotations: [RockAnnotation]
+
+    /// Initializes the view with specified latitude and longitude.
+    /// The cameraPosition state is configured during initialization.
+    init(lat: Double, lon: Double) {
+        self.lat = lat
+        self.lon = lon
+
+        // An initial region is defined with the provided latitude and longitude
+        let region = MKCoordinateRegion(
+            center: CLLocationCoordinate2D(latitude: lat, longitude: lon),
+            span: MKCoordinateSpan(latitudeDelta: 5, longitudeDelta: 5)
+        )
+
+        // The cameraPosition is initialized using the defined region
+        _cameraPosition = State(initialValue: MapCameraPosition.region(region))
+
+        // The annotations array is initialized with a RockAnnotation instance
+        annotations = [
+            RockAnnotation(coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon))
+        ]
+    }
+
+    var body: some View {
+        // The Map view is configured with the updated initializer
+        Map(
+            position: $cameraPosition,
+            interactionModes: .all // All interaction modes are allowed
+        ) {
+            // The user's current location is displayed on the map
+            UserAnnotation()
+
+            // Custom annotations are iterated over and added to the map
+            ForEach(annotations) { annotation in
+                Annotation("rock", coordinate: annotation.coordinate, anchor: .center) {
+                    VStack {
+                        Circle()
+                            .stroke(Color.blue, lineWidth: 2) // A blue circle is drawn around the annotation
+                            .frame(width: 30, height: 30)
+                        Text("🪨") // An optional emoji is displayed below the circle
+                            .font(.caption)
+                    }
+                }
+            }
+        }
+        .ignoresSafeArea() // The map is allowed to extend beyond safe area boundaries
+        // A debugging tip is provided below to verify annotation coordinates if they do not appear
+        // Debugging Tip: If annotations do not appear, verify the `coordinate` values.
+    }
+}
+
+struct MapView_Previews: PreviewProvider {
+    static var previews: some View {
+        // A preview is provided with a specific location (San Francisco, CA)
+        MapView(lat: 37.7749, lon: -122.4194)
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/AccountSettingsView.swift
+---
+// -----------------------------------------------------------
+// AccountSettingsView.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file enables the user to update profile details such
+// as name and email. The view also dismisses itself when
+// the user taps the close button in the toolbar.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+// A string extension is provided to allow the alert(item:) usage.
+extension String: Identifiable {
+    public var id: String { self }
+}
+
+/// The AccountSettingsView is used for managing user account settings.
+/// It relies on an AccountSettingsViewModel injected via @EnvironmentObject.
+struct AccountSettingsView: View {
+    @EnvironmentObject var accountSettingsViewModel: AccountSettingsViewModel
+    @Environment(\.presentationMode) var presentationMode
+    
+    // Local states to hold user inputs for name and email.
+    @State private var name: String = ""
+    @State private var email: String = ""
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section(header: Text("Profile")) {
+                    // TextField is used for editing the user's name.
+                    TextField("Name", text: $name)
+                    
+                    // TextField is used for editing the user's email.
+                    TextField("Email", text: $email)
+                    
+                    // A button is used to trigger a profile update action.
+                    Button(action: {
+                        accountSettingsViewModel.updateUserProfile(name: name, email: email)
+                    }) {
+                        Text("Update Profile")
+                    }
+                }
+            }
+            .navigationTitle("Account Settings")
+            .toolbar {
+                // The toolbar includes a close button on the trailing side.
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
+            // An alert is shown if an error message is set in the ViewModel.
+            .alert(item: $accountSettingsViewModel.updateProfileErrorMessage) { error in
+                Alert(
+                    title: Text("Error"),
+                    message: Text(error),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            // A separate alert is shown if a success message is set in the ViewModel.
+            .alert(item: $accountSettingsViewModel.updateProfileSuccessMessage) { success in
+                Alert(
+                    title: Text("Success"),
+                    message: Text(success),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/CreateAccountView.swift
+---
+//
+//  CreateAccountView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+
+import SwiftUI
+
+struct CreateAccountView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
+    @State private var email: String = ""
+    @State private var password: String = ""
+    @State private var confirmPassword: String = ""
+    
+    // State variables for controlling alerts
+    @State private var showErrorAlert: Bool = false
+    @State private var showSuccessAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // State variable to manage loading state
+    @State private var isLoading: Bool = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // AppIcon Image
+                Image("logo") // Ensure "logo" matches the image name in Assets.xcassets/AppIcon.appiconset
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .padding(.top, 50)
+                
+                Text("Create Account")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("DefaultTextColor"))
+                
+                VStack(spacing: 15) {
+                    // Email Input
+                    TextField("Email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                        .padding(.horizontal, 20)
+                        .background(Color("DefaultBackground"))
+                        .cornerRadius(8)
+                    
+                    // Password Input
+                    SecureField("Password", text: $password)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal, 20)
+                        .background(Color("DefaultBackground"))
+                        .cornerRadius(8)
+                    
+                    // Confirm Password Input
+                    SecureField("Confirm Password", text: $confirmPassword)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal, 20)
+                        .background(Color("DefaultBackground"))
+                        .cornerRadius(8)
+                }
+                
+                // Register Button
+                Button(action: {
+                    register()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Register")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color("ButtonDefault"))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(isLoading)
+                .buttonStyle(CustomButtonStyle())
+                
+                Spacer()
+            }
+            .padding(.horizontal, 32)
+        }
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+        .navigationBarTitle("Create Account", displayMode: .inline)
+        // Observe changes in AuthViewModel's errorMessage and successMessage
+        .onReceive(authViewModel.$errorMessage) { error in
+            if let error = error {
+                alertMessage = error
+                showErrorAlert = true
+            }
+        }
+        .onReceive(authViewModel.$successMessage) { success in
+            if let success = success {
+                alertMessage = success
+                showSuccessAlert = true
+            }
+        }
+        // Present error alert
+        .alert(isPresented: $showErrorAlert) {
+            Alert(
+                title: Text("Error"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    authViewModel.clearMessages()
+                }
+            )
+        }
+        // Present success alert
+        .alert(isPresented: $showSuccessAlert) {
+            Alert(
+                title: Text("Success"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    authViewModel.clearMessages()
+                }
+            )
+        }
+    }
+    
+    // MARK: - Register Function
+    private func register() {
+        // Input Validation
+        guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty else {
+            alertMessage = "All fields are required."
+            showErrorAlert = true
+            return
+        }
+        
+        guard password == confirmPassword else {
+            alertMessage = "Passwords do not match."
+            showErrorAlert = true
+            return
+        }
+        
+        // Optionally, add more validation (e.g., password strength)
+        
+        // Set loading state
+        isLoading = true
+        
+        // Call AuthViewModel's register function
+        authViewModel.register(email: email, password: password)
+        
+        // Reset loading state after a delay to allow AuthViewModel to process
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isLoading = false
+        }
+    }
+    
+    // MARK: - Custom Button Style
+    struct CustomButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .background(
+                    configuration.isPressed ?
+                    Color("ButtonPressed") :
+                    Color("ButtonDefault")
+                )
+                .cornerRadius(8)
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+        }
+    }
+}
+
+struct CreateAccountView_Previews: PreviewProvider {
+    static var previews: some View {
+        CreateAccountView()
+            .environmentObject(AuthViewModel())
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/ForgotPasswordView.swift
+---
+//
+//  ForgotPasswordView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Ignacio Padilla Herrera on 23/12/24.
+//
+
+import SwiftUI
+
+struct ForgotPasswordView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    
+    @State private var email: String = ""
+    
+    // State variables for controlling alerts
+    @State private var showErrorAlert: Bool = false
+    @State private var showSuccessAlert: Bool = false
+    @State private var alertMessage: String = ""
+    
+    // State variable to manage loading state
+    @State private var isLoading: Bool = false
+    
+    var body: some View {
+        ScrollView {
+            VStack(spacing: 20) {
+                // AppIcon Image
+                Image("logo") // Ensure "logo" matches the image name in Assets.xcassets/AppIcon.appiconset
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 150, height: 150)
+                    .padding(.top, 50)
+                
+                Text("Reset Password")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("DefaultTextColor"))
+                
+                VStack(spacing: 15) {
+                    // Email Input
+                    TextField("Enter your email", text: $email)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                        .keyboardType(.emailAddress)
+                        .padding(.horizontal, 20)
+                        .background(Color("DefaultBackground"))
+                        .cornerRadius(8)
+                }
+                
+                // Reset Password Button
+                Button(action: {
+                    resetPassword()
+                }) {
+                    if isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        Text("Send Reset Link")
+                            .fontWeight(.semibold)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color("ButtonDefault"))
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                }
+                .disabled(isLoading)
+                .buttonStyle(CustomButtonStyle())
+                
+                Spacer()
+            }
+            .padding(.horizontal, 32)
+        }
+        .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
+        .navigationBarTitle("Reset Password", displayMode: .inline)
+        // Observe changes in AuthViewModel's errorMessage and successMessage
+        .onReceive(authViewModel.$errorMessage) { error in
+            if let error = error {
+                alertMessage = error
+                showErrorAlert = true
+            }
+        }
+        .onReceive(authViewModel.$successMessage) { success in
+            if let success = success {
+                alertMessage = success
+                showSuccessAlert = true
+            }
+        }
+        // Present error alert
+        .alert(isPresented: $showErrorAlert) {
+            Alert(
+                title: Text("Error"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    authViewModel.clearMessages()
+                }
+            )
+        }
+        // Present success alert
+        .alert(isPresented: $showSuccessAlert) {
+            Alert(
+                title: Text("Success"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")) {
+                    authViewModel.clearMessages()
+                }
+            )
+        }
+    }
+    
+    // MARK: - Reset Password Function
+    private func resetPassword() {
+        // Input Validation
+        guard !email.isEmpty else {
+            alertMessage = "Please enter your email."
+            showErrorAlert = true
+            return
+        }
+        
+        // Optionally, add more validation (e.g., email format)
+        
+        // Set loading state
+        isLoading = true
+        
+        // Call AuthViewModel's resetPassword function
+        authViewModel.resetPassword(email: email)
+        
+        // Reset loading state after a delay to allow AuthViewModel to process
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isLoading = false
+        }
+    }
+    
+    // MARK: - Custom Button Style
+    struct CustomButtonStyle: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .background(
+                    configuration.isPressed ?
+                    Color("ButtonPressed") :
+                    Color("ButtonDefault")
+                )
+                .cornerRadius(8)
+                .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+        }
+    }
+}
+
+struct ForgotPasswordView_Previews: PreviewProvider {
+    static var previews: some View {
+        ForgotPasswordView()
+            .environmentObject(AuthViewModel())
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Views/FeatureLauncherView.swift
+---
+// -----------------------------------------------------------
+// FeatureLauncherView.swift
+// Author: Carlos Padilla on 01/01/2025
+// -----------------------------------------------------------
+// Description:
+// This file provides a simple SwiftUI view that demonstrates
+// features 4-10 (push notifications, local notifications,
+// in-app purchases, analytics, theme toggling, voiceover,
+// and biometric authentication). It is referenced by
+// GeoRocksIOSApp in a TabView for authenticated users.
+// -----------------------------------------------------------
+
+import SwiftUI
+
+struct FeatureLauncherView: View {
+    // Simple local states to track whether certain features have been triggered.
+    @State private var pushTriggered = false
+    @State private var localNotifScheduled = false
+    @State private var iapFetched = false
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Feature Launcher")
+                .font(.title)
+                .padding()
+            
+            // Trigger push authorization once.
+            if !pushTriggered {
+                Button("Request Push Authorization") {
+                    PushNotificationManager.shared.requestAuthorization()
+                    pushTriggered = true
+                }
+            }
+            
+            // Fetch IAP products once, for demonstration.
+            if !iapFetched {
+                Button("Fetch IAP Products") {
+                    IAPManager.shared.fetchProducts(productIDs: ["com.yourapp.exampleitem"])
+                    iapFetched = true
+                }
+            }
+            
+            // Toggle theme on demand.
+            Button("Toggle Theme") {
+                ThemeManager.shared.toggleTheme()
+            }
+            
+            // Link to VoiceOverChampion (AccessibilityExampleView).
+            NavigationLink(destination: AccessibilityExampleView()) {
+                Text("VoiceOver Demo")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+            }
+            
+            // Schedule a local notification if not done yet.
+            if !localNotifScheduled {
+                Button("Schedule Local Notification") {
+                    let manager = LocalNotificationManager()
+                    manager.scheduleNotification(
+                        title: "Hello from LocalNotificationBuddy",
+                        body: "5 seconds delayed notification!",
+                        timeInterval: 5
+                    )
+                    localNotifScheduled = true
+                }
+            }
+            
+            // Test biometric authentication.
+            Button("Test Biometric Auth") {
+                BiometricAuthManager.shared.authenticateUser { success, errorMessage in
+                    if success {
+                        print("Biometric Auth Success!")
+                    } else {
+                        print("Biometric Auth Failed: \(errorMessage ?? "Unknown error")")
+                    }
+                }
+            }
+        }
+        .padding()
+        // An analytics event is logged when this view appears.
+        .onAppear {
+            AnalyticsManager.shared.logEvent(
+                name: "FeatureLauncherView_Opened",
+                parameters: ["screen": "FeatureLauncher"]
+            )
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/ContentView.swift
+---
+//
+//  ContentView.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+
+import SwiftUI
+
+/**
+ ContentView is a simple SwiftUI structure, often generated by default.
+ You may use it as:
+ - A placeholder or welcome screen
+ - A splash screen
+ - A simple test view for your layout
+ */
+struct ContentView: View {
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                Text("Welcome to GeoRocks iOS!")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                
+                Text("This is your starting view. You can replace it with LoginView or MainRocksView, depending on your app flow.")
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+                
+                NavigationLink(destination: LoginView()) {
+                    Text("Go to Login")
+                        .fontWeight(.semibold)
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.cornerRadius(8))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 32)
+                
+                NavigationLink(destination: MainRocksView()) {
+                    Text("Go to Rocks List")
+                        .fontWeight(.semibold)
+                        .frame(minWidth: 0, maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green.cornerRadius(8))
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 32)
+                
+                Spacer()
+            }
+            .padding()
+            .navigationTitle("Content View")
+        }
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Services/UserService.swift
+---
+// UserService.swift
+// GeoRocksIOS
+
+import Foundation
+import Combine
+
+// Protocol is defined once to outline user-related network requests.
+protocol UserServiceProtocol {
+    func updateProfile(name: String, email: String, completion: @escaping (Result<Void, Error>) -> Void)
+    func changePassword(oldPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void)
+    // The deleteAccount method has been removed as per user request.
+}
+
+// Implementation of UserServiceProtocol.
+class UserService: UserServiceProtocol {
+    static let shared = UserService()
+    
+    private init() {}
+    
+    func updateProfile(name: String, email: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Implementation of profile update.
+        // Simulated network delay.
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+            // Assuming the update is successful.
+            completion(.success(()))
+        }
+    }
+    
+    func changePassword(oldPassword: String, newPassword: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        // Implementation of password change.
+        DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+            // Assuming the password change is successful.
+            completion(.success(()))
+        }
+    }
+    
+    // The deleteAccount method has been removed to comply with user request.
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Services/SearchBar.swift
+---
+//
+//  SearchBar.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Ignacio Padilla Herrera on 11/01/25.
+//
+
+// SearchBar.swift
+// GeoRocksIOS
+
+import SwiftUI
+
+struct SearchBar: View {
+    @Binding var text: String
+    
+    var body: some View {
+        HStack {
+            TextField("Search...", text: $text)
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.horizontal, 8)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Services/NetworkingService.swift
+---
+//
+//  NetworkingService.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Padilla on 12/12/2024.
+//
+
+import Foundation
+
+enum NetworkingError: Error, LocalizedError {
+    case invalidURL
+    case noData
+    case invalidResponse
+    case httpError(Int) // Associated value for HTTP status code
+    case decodingError(String) // Associated value for decoding message
+    
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "The URL provided was invalid."
+        case .noData:
+            return "No data was received from the server."
+        case .invalidResponse:
+            return "Invalid response from the server."
+        case .httpError(let statusCode):
+            return "HTTP Code Error: \(statusCode)"
+        case .decodingError(let message):
+            return "Decoding Error: \(message)"
+        }
+    }
+}
+
+class NetworkingService {
+    
+    // Singleton instance for global access
+    static let shared = NetworkingService()
+    
+    // Private initializer to prevent multiple instances
+    private init() { }
+    
+    /// Fetches the list of rocks from the backend.
+    /// - Parameter completion: Completion handler with Result containing an array of RockDto or an Error.
+    func fetchRockList(completion: @escaping (Result<[RockDto], Error>) -> Void) {
+        // Updated Base URL to match Apiary mock server
+        guard let url = URL(string: "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_list") else {
+            completion(.failure(NetworkingError.invalidURL))
+            print("Invalid URL: https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_list")
+            return
+        }
+        
+        // Initiate data task
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            
+            // Handle network errors
+            if let error = error {
+                completion(.failure(error))
+                print("Network Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Check for valid HTTP response and status code
+            if let httpResponse = response as? HTTPURLResponse {
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    completion(.failure(NetworkingError.httpError(httpResponse.statusCode)))
+                    print("HTTP Error with status code: \(httpResponse.statusCode)")
+                    return
+                }
+            } else {
+                completion(.failure(NetworkingError.invalidResponse))
+                print("Invalid response from the server.")
+                return
+            }
+            
+            // Ensure data is received
+            guard let data = data else {
+                completion(.failure(NetworkingError.noData))
+                print("No data received from the server.")
+                return
+            }
+            
+            do {
+                // Decode JSON data into an array of RockDto
+                let decoded = try JSONDecoder().decode([RockDto].self, from: data)
+                completion(.success(decoded))
+            } catch {
+                // Handle decoding errors with detailed messages
+                completion(.failure(NetworkingError.decodingError(error.localizedDescription)))
+                print("Decoding Error: \(error.localizedDescription)")
+            }
+        }
+        
+        // Start the network request
+        task.resume()
+    }
+    
+    /// Fetches detailed information about a specific rock using its ID.
+    /// - Parameters:
+    ///   - rockId: The unique identifier of the rock.
+    ///   - completion: Completion handler with Result containing RockDetailDto or an Error.
+    func fetchRockDetail(rockId: String, completion: @escaping (Result<RockDetailDto, Error>) -> Void) {
+        // Updated Base URL to match Apiary mock server
+        let urlString = "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_detail/\(rockId)"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NetworkingError.invalidURL))
+            print("Invalid URL: \(urlString)")
+            return
+        }
+        
+        // Initiate data task
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            
+            // Handle network errors
+            if let error = error {
+                completion(.failure(error))
+                print("Network Error: \(error.localizedDescription)")
+                return
+            }
+            
+            // Check for valid HTTP response and status code
+            if let httpResponse = response as? HTTPURLResponse {
+                guard (200...299).contains(httpResponse.statusCode) else {
+                    completion(.failure(NetworkingError.httpError(httpResponse.statusCode)))
+                    print("HTTP Error with status code: \(httpResponse.statusCode)")
+                    return
+                }
+            } else {
+                completion(.failure(NetworkingError.invalidResponse))
+                print("Invalid response from the server.")
+                return
+            }
+            
+            // Ensure data is received
+            guard let data = data else {
+                completion(.failure(NetworkingError.noData))
+                print("No data received from the server.")
+                return
+            }
+            
+            do {
+                // Decode JSON data into RockDetailDto
+                let decoded = try JSONDecoder().decode(RockDetailDto.self, from: data)
+                completion(.success(decoded))
+            } catch {
+                // Handle decoding errors with detailed messages
+                completion(.failure(NetworkingError.decodingError(error.localizedDescription)))
+                print("Decoding Error: \(error.localizedDescription)")
+            }
+        }
+        
+        // Start the network request
+        task.resume()
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Services/ShareRockFeature.swift
+---
+//
+//  ShareRockFeature.swift
+//  GeoRocksIOS
+//
+//  Created by Carlos Ignacio Padilla Herrera on 11/01/25.
+//
+
+// ShareRockFeature.swift
+// GeoRocksIOS
+
+import SwiftUI
+
+struct ShareRockFeature: View {
+    let rockTitle: String
+    let rockDetails: String
+    
+    @State private var isShareSheetPresented: Bool = false
+    
+    var body: some View {
+        Button(action: {
+            isShareSheetPresented = true
+        }) {
+            Text("Share Rock")
+                .padding()
+                .background(Color("ButtonDefault"))
+                .foregroundColor(.white)
+                .cornerRadius(8)
+        }
+        .sheet(isPresented: $isShareSheetPresented) {
+            ActivityViewController(activityItems: [rockTitle, rockDetails])
+        }
+    }
+}
+
+struct ActivityViewController: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+    }
+    
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOSUITests/GeoRocksIOSUITests.swift
+---
+//
+//  GeoRocksIOSUITests.swift
+//  GeoRocksIOSUITests
+//
+//  Created by Carlos Ignacio Padilla Herrera on 22/12/24.
+//
+
+import XCTest
+
+final class GeoRocksIOSUITests: XCTestCase {
+
+    override func setUpWithError() throws {
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+
+        // In UI tests it is usually best to stop immediately when a failure occurs.
+        continueAfterFailure = false
+
+        // In UI tests it’s important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+    }
+
+    override func tearDownWithError() throws {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    }
+
+    func testExample() throws {
+        // UI tests must launch the application that they test.
+        let app = XCUIApplication()
+        app.launch()
+
+        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    }
+
+    func testLaunchPerformance() throws {
+        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
+            // This measures how long it takes to launch your application.
+            measure(metrics: [XCTApplicationLaunchMetric()]) {
+                XCUIApplication().launch()
+            }
+        }
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOSUITests/GeoRocksIOSUITestsLaunchTests.swift
+---
+//
+//  GeoRocksIOSUITestsLaunchTests.swift
+//  GeoRocksIOSUITests
+//
+//  Created by Carlos Ignacio Padilla Herrera on 22/12/24.
+//
+
+import XCTest
+
+final class GeoRocksIOSUITestsLaunchTests: XCTestCase {
+
+    override class var runsForEachTargetApplicationUIConfiguration: Bool {
+        true
+    }
+
+    override func setUpWithError() throws {
+        continueAfterFailure = false
+    }
+
+    func testLaunch() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Insert steps here to perform after app launch but before taking a screenshot,
+        // such as logging into a test account or navigating somewhere in the app
+
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = "Launch Screen"
+        attachment.lifetime = .keepAlways
+        add(attachment)
+    }
+}
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/Podfile
+---
+platform :ios, '16.0' 
+
+target 'GeoRocksIOS' do
+  use_frameworks!
+
+  pod 'Alamofire', '~> 5.6'
+  pod 'SDWebImage', '~> 5.20'
+end
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/GeoRocksIOS/Info.plist
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Test_API</key>
+	<string></string>
+</dict>
+</plist>
+
+
+---
+File: /Users/enigmak9/github/ProyectoFinal/georocksios/Info.plist
+---
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleExecutable</key>
+	<string></string>
+</dict>
+</plist>
+
+
