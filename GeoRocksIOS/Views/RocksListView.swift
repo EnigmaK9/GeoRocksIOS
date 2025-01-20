@@ -154,7 +154,7 @@ struct RocksListView: View {
                                 .foregroundColor(Color("ButtonDefault"))
                         }
                         .sheet(isPresented: $showingAddRock) {
-                            AddRockView()
+                            AddNewRockView()
                                 .environmentObject(rocksViewModel)
                         }
                     }

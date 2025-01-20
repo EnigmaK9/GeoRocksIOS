@@ -3,73 +3,130 @@
 // Author: Carlos Padilla on 01/01/2025
 // -----------------------------------------------------------
 // Description:
-// This file enables the user to update profile details such
-// as name and email. The view also dismisses itself when
-// the user taps the close button in the toolbar.
+// This file provides a professional SwiftUI view for account
+// settings, including profile information, account settings,
+// notifications, app preferences, and support options.
+// It enhances the user interface with organized sections
+// and intuitive navigation.
 // -----------------------------------------------------------
 
 import SwiftUI
 
-// A string extension is provided to allow the alert(item:) usage.
-extension String: Identifiable {
-    public var id: String { self }
-}
-
-/// The AccountSettingsView is used for managing user account settings.
-/// It relies on an AccountSettingsViewModel injected via @EnvironmentObject.
 struct AccountSettingsView: View {
-    @EnvironmentObject var accountSettingsViewModel: AccountSettingsViewModel
-    @Environment(\.presentationMode) var presentationMode
-    
-    // Local states to hold user inputs for name and email.
-    @State private var name: String = ""
-    @State private var email: String = ""
+    @State private var notificationsEnabled = true
+    @State private var emailNotifications = false
+    @State private var smsNotifications = false
+    @State private var darkModeEnabled = false
     
     var body: some View {
         NavigationView {
             Form {
+                // Profile Section
                 Section(header: Text("Profile")) {
-                    // TextField is used for editing the user's name.
-                    TextField("Name", text: $name)
-                    
-                    // TextField is used for editing the user's email.
-                    TextField("Email", text: $email)
-                    
-                    // A button is used to trigger a profile update action.
+                    HStack(spacing: 16) {
+                        Image("profile_placeholder")
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 70, height: 70)
+                            .clipShape(Circle())
+                            .overlay(
+                                Circle().stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                            )
+                            .shadow(radius: 3)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Carlos Padilla")
+                                .font(.headline)
+                            Text("carlos.padilla@example.com")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                    }
                     Button(action: {
-                        accountSettingsViewModel.updateUserProfile(name: name, email: email)
+                        // Action for editing profile
                     }) {
-                        Text("Update Profile")
+                        Text("Edit Profile")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                }
+                
+                // Account Section
+                Section(header: Text("Account")) {
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Change Password")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Privacy Settings")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Connected Accounts")
+                    }
+                }
+                
+                // Notifications Section
+                Section(header: Text("Notifications")) {
+                    Toggle(isOn: $notificationsEnabled) {
+                        Text("Enable Notifications")
+                    }
+                    
+                    if notificationsEnabled {
+                        Toggle(isOn: $emailNotifications) {
+                            Text("Email Notifications")
+                        }
+                        Toggle(isOn: $smsNotifications) {
+                            Text("SMS Notifications")
+                        }
+                    }
+                }
+                
+                // App Preferences Section
+                Section(header: Text("Preferences")) {
+                    Toggle(isOn: $darkModeEnabled) {
+                        Text("Dark Mode")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Language")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("About")
+                    }
+                }
+                
+                // Support Section
+                Section(header: Text("Support")) {
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Help Center")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Contact Us")
+                    }
+                    NavigationLink(destination: EmptyView()) {
+                        Text("Terms & Conditions")
+                    }
+                }
+                
+                // Logout Button
+                Section {
+                    Button(action: {
+                        // Action for logging out
+                    }) {
+                        HStack {
+                            Spacer()
+                            Text("Log Out")
+                                .foregroundColor(.red)
+                            Spacer()
+                        }
                     }
                 }
             }
             .navigationTitle("Account Settings")
-            .toolbar {
-                // The toolbar includes a close button on the trailing side.
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                }
-            }
-            // An alert is shown if an error message is set in the ViewModel.
-            .alert(item: $accountSettingsViewModel.updateProfileErrorMessage) { error in
-                Alert(
-                    title: Text("Error"),
-                    message: Text(error),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-            // A separate alert is shown if a success message is set in the ViewModel.
-            .alert(item: $accountSettingsViewModel.updateProfileSuccessMessage) { success in
-                Alert(
-                    title: Text("Success"),
-                    message: Text(success),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
         }
+    }
+}
+
+struct AccountSettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        AccountSettingsView()
     }
 }
