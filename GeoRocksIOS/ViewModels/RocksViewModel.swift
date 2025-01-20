@@ -85,24 +85,55 @@ class RocksViewModel: ObservableObject {
     // MARK: - Remote Fetch
     
     /// Fetches the list of rocks from the backend API.
-    /// Any existing data is overwritten, and the loaded array is also saved locally for offline use.
+    /// Then fetches detailed data for each rock and updates the rocks array.
     func fetchRocks() {
         isLoading = true
         errorMessage = nil
+        rocks = [] // Clear existing rocks
         
         NetworkingService.shared.fetchRockList { [weak self] result in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-                self.isLoading = false
                 switch result {
                 case .success(let fetchedRocks):
-                    self.rocks = fetchedRocks
-                    self.saveToDisk()  // Save fetched data locally
+                    self.fetchDetailsForRocks(fetchedRocks)
                 case .failure(let error):
+                    self.isLoading = false
                     self.errorMessage = error.localizedDescription
                     print("Error fetching rocks: \(error.localizedDescription)")
                 }
             }
+        }
+    }
+    
+    /// Fetches detailed information for each rock and updates the rocks array.
+    private func fetchDetailsForRocks(_ rockList: [RockDto]) {
+        let dispatchGroup = DispatchGroup()
+        var detailedRocks: [RockDto] = []
+        isLoading = true
+        
+        for rock in rockList {
+            dispatchGroup.enter()
+            NetworkingService.shared.fetchRockDetail(rockId: rock.id) { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let detail):
+                        var updatedRock = rock
+                        updatedRock.mergeDetails(detail)
+                        detailedRocks.append(updatedRock)
+                    case .failure(let error):
+                        print("Error fetching details for rock ID \(rock.id): \(error.localizedDescription)")
+                        // Optionally, you can decide whether to append the rock without details
+                    }
+                    dispatchGroup.leave()
+                }
+            }
+        }
+        
+        dispatchGroup.notify(queue: .main) {
+            self.isLoading = false
+            self.rocks = detailedRocks
+            self.saveToDisk()  // Save fetched data locally
         }
     }
     

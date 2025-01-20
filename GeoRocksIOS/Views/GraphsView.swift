@@ -1,181 +1,220 @@
+
 // GraphsView.swift
 // GeoRocksIOS
-// -----------------------------------------------------------
-// GraphsView.swift
-// Author: Carlos Padilla on 01/01/2025
+// Updated by Assistant on 01/01/2025
 // -----------------------------------------------------------
 // Description:
 // This view displays graphs about the rocks data fetched from
-// the mock backend. It utilizes SwiftUI Charts to visualize
-// data such as the distribution of rock hardness, types,
-// classifications, and health risks.
+// the backend. It utilizes SwiftUI Charts to visualize
+// data such as the distribution of rock types, colors,
+// magnetic properties, health risks, and hardness distribution.
+// It includes different chart types like Bar Charts, Pie Charts,
+// and Line Charts.
 // -----------------------------------------------------------
 
 import SwiftUI
 import Charts
 
-// Define a data model for hardness distribution
-struct HardnessData: Identifiable {
-    let id = UUID()
-    let hardness: Int
-    let count: Int
-}
-
-// Define a data model for rock types based on color
-struct RockTypeData: Identifiable {
-    let id = UUID()
-    let type: String
-    let count: Int
-}
-
-// Define a data model for rock member classifications
-struct RockMemberData: Identifiable {
-    let id = UUID()
-    let member: String
-    let count: Int
-}
-
-// Define a data model for health risks distribution
-struct HealthRiskData: Identifiable {
-    let id = UUID()
-    let risk: String
-    let count: Int
-}
-
 struct GraphsView: View {
     @EnvironmentObject var rocksViewModel: RocksViewModel
 
-    // Compute the hardness distribution from the rocks data
-    var hardnessDistribution: [HardnessData] {
-        let hardnessCounts = rocksViewModel.rocks.reduce(into: [:] as [Int: Int]) { counts, rock in
+    // Compute the distribution of rock types
+    var rockTypeDistribution: [String: Int] {
+        var counts = [String: Int]()
+        for rock in rocksViewModel.rocks {
+            let type = rock.aMemberOf ?? "Unknown"
+            counts[type, default: 0] += 1
+        }
+        return counts
+    }
+
+    // Compute the distribution of rock colors
+    var colorDistribution: [String: Int] {
+        var counts = [String: Int]()
+        for rock in rocksViewModel.rocks {
+            let colors = rock.color?.components(separatedBy: ",") ?? ["Unknown"]
+            for color in colors {
+                let trimmedColor = color.trimmingCharacters(in: .whitespacesAndNewlines)
+                counts[trimmedColor, default: 0] += 1
+            }
+        }
+        return counts
+    }
+
+    // Compute the magnetic property distribution
+    var magneticDistribution: [String: Int] {
+        var counts = ["Magnetic": 0, "Non-Magnetic": 0]
+        for rock in rocksViewModel.rocks {
+            let isMagnetic = rock.magnetic ?? false
+            if isMagnetic {
+                counts["Magnetic", default: 0] += 1
+            } else {
+                counts["Non-Magnetic", default: 0] += 1
+            }
+        }
+        return counts
+    }
+
+    // Compute the health risks distribution
+    var healthRiskDistribution: [String: Int] {
+        var counts = [String: Int]()
+        for rock in rocksViewModel.rocks {
+            let risk = rock.healthRisks ?? "None"
+            counts[risk, default: 0] += 1
+        }
+        return counts
+    }
+
+    // Compute the hardness distribution
+    var hardnessDistribution: [Int: Int] {
+        var counts = [Int: Int]()
+        for rock in rocksViewModel.rocks {
             if let hardness = rock.hardness {
                 counts[hardness, default: 0] += 1
             }
         }
-        return hardnessCounts.map { HardnessData(hardness: $0.key, count: $0.value) }
-            .sorted { $0.hardness < $1.hardness }
-    }
-
-    // Compute rock type distribution (using color as a proxy for type)
-    var rockTypeDistribution: [RockTypeData] {
-        let typeCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
-            let type = rock.color ?? "Unknown"
-            counts[type, default: 0] += 1
-        }
-        return typeCounts.map { RockTypeData(type: $0.key, count: $0.value) }
-            .sorted { $0.type < $1.type }
-    }
-
-    // Compute rock member classification distribution
-    var rockMemberDistribution: [RockMemberData] {
-        let memberCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
-            let member = rock.aMemberOf ?? "Unknown" // Placeholder since aMemberOf doesn't exist
-            counts[member, default: 0] += 1
-        }
-        return memberCounts.map { RockMemberData(member: $0.key, count: $0.value) }
-            .sorted { $0.member < $1.member }
-    }
-
-    // Compute health risks distribution
-    var healthRiskDistribution: [HealthRiskData] {
-        let riskCounts = rocksViewModel.rocks.reduce(into: [:] as [String: Int]) { counts, rock in
-            let risk = rock.healthRisks ?? "None"
-            counts[risk, default: 0] += 1
-        }
-        return riskCounts.map { HealthRiskData(risk: $0.key, count: $0.value) }
-            .sorted { $0.risk < $1.risk }
+        return counts
     }
 
     var body: some View {
         NavigationView {
             ScrollView {
-                VStack(spacing: 20) {
-                    Text("Rock Hardness Distribution")
-                        .font(.title)
-                        .padding()
+                VStack(spacing: 30) {
+                    // Bar Chart: Distribution of Rock Types
+                    if !rockTypeDistribution.isEmpty {
+                        Text("Distribution of Rock Types")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.top)
 
-                    if #available(iOS 16.0, *) {
-                        // Bar chart for hardness distribution
-                        Chart(hardnessDistribution) { dataPoint in
-                            BarMark(
-                                x: .value("Hardness", dataPoint.hardness),
-                                y: .value("Count", dataPoint.count)
-                            )
-                            .foregroundStyle(Color.blue)
-                        }
-                        .chartXAxisLabel("Hardness")
-                        .chartYAxisLabel("Number of Rocks")
-                        .frame(height: 300)
-                        .padding()
-                    } else {
-                        Text("Charts are available on iOS 16 and above.")
-                            .foregroundColor(.red)
+                        if #available(iOS 16.0, *) {
+                            Chart {
+                                ForEach(rockTypeDistribution.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                    BarMark(
+                                        x: .value("Type", key),
+                                        y: .value("Count", value)
+                                    )
+                                    .foregroundStyle(Color.blue)
+                                }
+                            }
+                            .chartXAxisLabel("Type")
+                            .chartYAxisLabel("Count")
+                            .frame(height: 300)
                             .padding()
+                        }
                     }
 
-                    // Bar chart for rock type distribution
-                    Text("Rock Type Distribution")
-                        .font(.title)
-                        .padding()
-                    if #available(iOS 16.0, *) {
-                        Chart(rockTypeDistribution) { dataPoint in
-                            BarMark(
-                                x: .value("Type", dataPoint.type),
-                                y: .value("Count", dataPoint.count)
-                            )
-                            .foregroundStyle(Color.green)
+                    // Pie Chart: Distribution of Rock Colors
+                    if !colorDistribution.isEmpty {
+                        Text("Distribution of Rock Colors")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.top)
+
+                        if #available(iOS 16.0, *) {
+                            Chart {
+                                ForEach(colorDistribution.sorted(by: { $0.value > $1.value }), id: \.key) { key, value in
+                                    SectorMark(
+                                        angle: .value("Count", value),
+                                        innerRadius: 50,
+                                        angularInset: 1
+                                    )
+                                    .foregroundStyle(by: .value("Color", key))
+                                    .annotation(position: .overlay) {
+                                        Text(key)
+                                            .font(.caption2)
+                                            .foregroundColor(.white)
+                                    }
+                                }
+                            }
+                            .chartLegend(.hidden)
+                            .frame(height: 300)
+                            .padding()
                         }
-                        .chartXAxisLabel("Rock Type")
-                        .chartYAxisLabel("Count")
-                        .frame(height: 300)
-                        .padding()
                     }
 
-                    // Bar chart for rock member classification distribution
-                    Text("Rock Member Classification Distribution")
-                        .font(.title)
-                        .padding()
-                    if #available(iOS 16.0, *) {
-                        Chart(rockMemberDistribution) { dataPoint in
-                            BarMark(
-                                x: .value("Member", dataPoint.member),
-                                y: .value("Count", dataPoint.count)
-                            )
-                            .foregroundStyle(Color.orange)
+                    // Bar Chart: Magnetic Properties
+                    if !magneticDistribution.isEmpty {
+                        Text("Magnetic Properties of Rocks")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.top)
+
+                        if #available(iOS 16.0, *) {
+                            Chart {
+                                ForEach(magneticDistribution.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                    BarMark(
+                                        x: .value("Magnetic", key),
+                                        y: .value("Count", value)
+                                    )
+                                    .foregroundStyle(Color.orange)
+                                }
+                            }
+                            .chartXAxisLabel("Magnetic")
+                            .chartYAxisLabel("Count")
+                            .frame(height: 300)
+                            .padding()
                         }
-                        .chartXAxisLabel("Rock Member Classification")
-                        .chartYAxisLabel("Count")
-                        .frame(height: 300)
-                        .padding()
                     }
 
-                    // Bar chart for health risks distribution
-                    Text("Health Risks Distribution")
-                        .font(.title)
-                        .padding()
-                    if #available(iOS 16.0, *) {
-                        Chart(healthRiskDistribution) { dataPoint in
-                            BarMark(
-                                x: .value("Risk", dataPoint.risk),
-                                y: .value("Count", dataPoint.count)
-                            )
-                            .foregroundStyle(Color.red)
+                    // Bar Chart: Health Risks
+                    if !healthRiskDistribution.isEmpty {
+                        Text("Health Risks Associated with Rocks")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.top)
+
+                        if #available(iOS 16.0, *) {
+                            Chart {
+                                ForEach(healthRiskDistribution.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                    BarMark(
+                                        x: .value("Health Risk", key),
+                                        y: .value("Count", value)
+                                    )
+                                    .foregroundStyle(Color.red)
+                                }
+                            }
+                            .chartXAxisLabel("Health Risk")
+                            .chartYAxisLabel("Count")
+                            .frame(height: 300)
+                            .padding()
                         }
-                        .chartXAxisLabel("Health Risk")
-                        .chartYAxisLabel("Count")
-                        .frame(height: 300)
-                        .padding()
                     }
+
+                    // Line Chart: Hardness Distribution
+                    if !hardnessDistribution.isEmpty {
+                        Text("Hardness Distribution")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .padding(.top)
+
+                        if #available(iOS 16.0, *) {
+                            Chart {
+                                ForEach(hardnessDistribution.sorted(by: { $0.key < $1.key }), id: \.key) { key, value in
+                                    LineMark(
+                                        x: .value("Hardness", key),
+                                        y: .value("Count", value)
+                                    )
+                                    .foregroundStyle(Color.purple)
+                                }
+                            }
+                            .chartXAxisLabel("Hardness")
+                            .chartYAxisLabel("Count")
+                            .frame(height: 300)
+                            .padding()
+                        }
+                    }
+
+                    Spacer()
                 }
+                .padding()
             }
             .navigationTitle("Graphs")
+            .onAppear {
+                if rocksViewModel.rocks.isEmpty {
+                    rocksViewModel.fetchRocks()
+                }
+            }
         }
-    }
-}
-
-struct GraphsView_Previews: PreviewProvider {
-    static var previews: some View {
-        GraphsView()
-            .environmentObject(RocksViewModel())
     }
 }
