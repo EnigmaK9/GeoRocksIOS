@@ -57,6 +57,10 @@
         // Frequently asked questions about the rock are stored
         let frequentlyAskedQuestions: [String]?
         
+        // Dynamic cut and thin section properties from backend
+        let cut: Bool?
+        let thinSection: Bool?
+        
         // Physical properties of the rock are stored
         let physicalProperties: PhysicalProperties?
         
@@ -120,13 +124,13 @@
                 if imageVal.hasPrefix("http") || imageVal == "Sin muestra" {
                     self.image = imageVal == "Sin muestra" ? nil : imageVal
                 } else {
-                    self.image = "http://localhost:5173/\(imageVal)"
+                    self.image = "http://192.168.1.64:5173/\(imageVal)"
                 }
             } else if let pic = try? backendContainer?.decodeIfPresent(String.self, forKey: .picture), pic != "Sin muestra", !pic.isEmpty {
                 if pic.hasPrefix("http") {
                     self.image = pic
                 } else {
-                    self.image = "http://localhost:5173/\(pic)"
+                    self.image = "http://192.168.1.64:5173/\(pic)"
                 }
             } else {
                 self.image = nil
@@ -175,6 +179,10 @@
             } else {
                 self.alsoKnownAs = nil
             }
+            
+            // Decode cut and thinSection fields directly
+            self.cut = try? backendContainer?.decodeIfPresent(Bool.self, forKey: .cut)
+            self.thinSection = try? backendContainer?.decodeIfPresent(Bool.self, forKey: .thinSection)
             
             // Other optional attributes
             self.formula = try? container.decodeIfPresent(String.self, forKey: .formula)

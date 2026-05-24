@@ -10,6 +10,8 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct RocksListView: View {
     // These @EnvironmentObjects provide data and state from shared ViewModels.
     @EnvironmentObject var rocksViewModel: RocksViewModel
@@ -26,180 +28,296 @@ struct RocksListView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
-                // The main content is grouped to handle loading/error states.
-                Group {
-                    if rocksViewModel.isLoading {
-                        // A progress indicator is displayed while data is being fetched.
-                        ProgressView("Loading Rocks...")
-                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
-                            .scaleEffect(1.5)
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
-                            .shadow(radius: 5)
-                    } else if let errorMessage = rocksViewModel.errorMessage {
-                        // An error message is shown if the fetch fails.
-                        Text("Error: \(errorMessage)")
-                            .foregroundColor(.red)
-                            .multilineTextAlignment(.center)
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
-                            .shadow(radius: 5)
-                    } else {
-                        // A list is displayed if rocks are successfully loaded.
-                        List {
-                            Section(header: SearchBar(text: $searchText)) {
-                                // The user can pick a sort option via segmented control.
-                                Picker("Sort By", selection: $sortOption) {
-                                    ForEach(SortOption.allCases) { option in
-                                        Text(option.rawValue).tag(option)
-                                    }
-                                }
-                                .pickerStyle(SegmentedPickerStyle())
-                                .padding(.vertical, 5)
-                                .onChange(of: sortOption) { _ in
-                                    rocksViewModel.sortRocks(option: sortOption)
-                                }
-                                
-                                // Filtered and sorted rocks are iterated to display each item.
-                                ForEach(rocksViewModel.filteredAndSortedRocks(searchText: searchText)) { rock in
-                                    NavigationLink(destination: RockDetailView(rockId: rock.id)) {
-                                        HStack(spacing: 12) {
-                                            // A thumbnail image is loaded asynchronously, if available.
-                                            if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
-                                                AsyncImage(url: url) { phase in
-                                                    switch phase {
-                                                    case .empty:
-                                                        // A placeholder is shown while the image is loading.
-                                                        Color.gray
-                                                            .frame(width: 50, height: 50)
-                                                            .overlay(
-                                                                ProgressView()
-                                                                    .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
-                                                            )
-                                                    case .success(let image):
-                                                        // The loaded image is displayed.
-                                                        image
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 50, height: 50)
-                                                            .clipped()
-                                                    case .failure:
-                                                        // A fallback is shown if the image fails to load.
-                                                        Color.red
-                                                            .frame(width: 50, height: 50)
-                                                            .overlay(
-                                                                Image(systemName: "photo")
-                                                                    .foregroundColor(.white)
-                                                            )
-                                                    @unknown default:
-                                                        // This fallback handles any unknown cases.
-                                                        Color.gray
-                                                            .frame(width: 50, height: 50)
-                                                    }
-                                                }
-                                                .cornerRadius(8)
-                                                .shadow(radius: 3)
-                                            } else {
-                                                // A gray box is shown if no thumbnail is available.
-                                                Color.gray
-                                                    .frame(width: 50, height: 50)
-                                                    .cornerRadius(8)
-                                                    .shadow(radius: 3)
-                                            }
-                                            
-                                            // The rock's title is shown.
-                                            Text(rock.title)
-                                                .font(.headline)
-                                                .foregroundColor(Color("DefaultTextColor"))
-                                                .lineLimit(1)
-                                            
-                                            Spacer()
-                                            
-                                            // A heart icon is used to toggle favorites.
-                                            Button(action: {
-                                                rocksViewModel.toggleFavorite(rock: rock)
-                                            }) {
-                                                Image(systemName: rocksViewModel.isFavorite(rock: rock) ? "heart.fill" : "heart")
-                                                    .foregroundColor(rocksViewModel.isFavorite(rock: rock) ? .red : .gray)
-                                            }
-                                            .buttonStyle(BorderlessButtonStyle())
-                                        }
-                                        .padding(.vertical, 6)
-                                        .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
-                                        .shadow(radius: 3)
-                                        .padding(.horizontal)
-                                    }
+            ZStack {
+                // Background Color
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
+                
+                VStack(spacing: 0) {
+                    
+                    // Custom search and filter panel
+                    VStack(spacing: 12) {
+                        // Premium Custom Search Bar
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundColor(.gray.opacity(0.8))
+                            
+                            TextField("Buscar especímenes...", text: $searchText)
+                                .foregroundColor(Color("DefaultTextColor"))
+                                .font(.body)
+                            
+                            if !searchText.isEmpty {
+                                Button(action: {
+                                    searchText = ""
+                                }) {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.gray)
                                 }
                             }
                         }
-                        .listStyle(PlainListStyle())
-                        .background(Color("BackgroundColor"))
-                        // A pull-to-refresh is added to re-fetch rocks if needed.
+                        .padding(.vertical, 10)
+                        .padding(.horizontal, 12)
+                        .background(Color("BoxBackground").opacity(0.8))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                        )
+                        .padding(.horizontal)
+                        
+                        // Premium Segmented Picker
+                        Picker("Sort By", selection: $sortOption) {
+                            ForEach(SortOption.allCases) { option in
+                                Text(option.rawValue).tag(option)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .padding(.horizontal)
+                        .onChange(of: sortOption) { _ in
+                            rocksViewModel.sortRocks(option: sortOption)
+                        }
+                    }
+                    .padding(.vertical, 12)
+                    .background(Color("BackgroundColor"))
+                    
+                    if rocksViewModel.isLoading {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                .scaleEffect(1.5)
+                            Text("Cargando catálogo...")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
+                    } else if let errorMessage = rocksViewModel.errorMessage {
+                        Spacer()
+                        VStack(spacing: 16) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.largeTitle)
+                                .foregroundColor(.red)
+                            Text("Error: \(errorMessage)")
+                                .foregroundColor(.red)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        Spacer()
+                    } else {
+                        // Premium Card ScrollView
+                        ScrollView {
+                            LazyVStack(spacing: 14) {
+                                ForEach(rocksViewModel.filteredAndSortedRocks(searchText: searchText)) { rock in
+                                    NavigationLink(destination: RockDetailView(rockId: rock.id)) {
+                                        RockCardView(
+                                            rock: rock,
+                                            isFavorite: rocksViewModel.isFavorite(rock: rock),
+                                            onFavoriteToggle: {
+                                                rocksViewModel.toggleFavorite(rock: rock)
+                                            }
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal)
+                            .padding(.top, 10)
+                            .padding(.bottom, 30)
+                        }
                         .refreshable {
                             rocksViewModel.fetchRocks()
                         }
                     }
                 }
-                .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
-                // The list is labeled with a navigation title.
-                .navigationTitle("Rocks List")
-                .toolbar {
-                    // The leading toolbar contains a button to add new rocks locally.
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button(action: {
-                            showingAddRock = true
-                        }) {
-                            Image(systemName: "plus")
-                                .foregroundColor(Color("ButtonDefault"))
-                        }
-                        .sheet(isPresented: $showingAddRock) {
-                            AddNewRockView()
-                                .environmentObject(rocksViewModel)
-                        }
+            }
+            .navigationTitle("GeoRocks UNAM")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showingAddRock = true
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(Color("ButtonDefault"))
                     }
-                    
-                    // The trailing toolbar provides access to settings, account, and sign out.
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        HStack(spacing: 20) {
-                            Button(action: {
-                                showingSettings.toggle()
-                            }) {
-                                Image(systemName: "gearshape")
-                                    .foregroundColor(Color("ButtonDefault"))
-                            }
-                            .sheet(isPresented: $showingSettings) {
-                                SettingsView()
-                            }
-                            
-                            Button(action: {
-                                showingAccountSettings.toggle()
-                            }) {
-                                Image(systemName: "person.circle")
-                                    .foregroundColor(Color("ButtonDefault"))
-                            }
-                            // The correct AccountSettingsView is presented here.
-                            .sheet(isPresented: $showingAccountSettings) {
-                                AccountSettingsView()
-                                    .environmentObject(accountSettingsViewModel)
-                            }
-                            
-                            Button(action: {
-                                authViewModel.signOut()
-                            }) {
-                                Image(systemName: "power")
-                                    .foregroundColor(Color("ButtonDefault"))
-                            }
-                        }
+                    .sheet(isPresented: $showingAddRock) {
+                        AddNewRockView()
+                            .environmentObject(rocksViewModel)
                     }
-                }
-                // Rocks are fetched as soon as the view appears.
-                .onAppear {
-                    rocksViewModel.fetchRocks()
                 }
                 
-                // **Se ha eliminado el VStack de botones de caché**
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack(spacing: 16) {
+                        Button(action: {
+                            showingSettings.toggle()
+                        }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.body)
+                                .foregroundColor(Color("ButtonDefault"))
+                        }
+                        .sheet(isPresented: $showingSettings) {
+                            SettingsView()
+                        }
+                        
+                        Button(action: {
+                            showingAccountSettings.toggle()
+                        }) {
+                            Image(systemName: "person.crop.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(Color("ButtonDefault"))
+                        }
+                        .sheet(isPresented: $showingAccountSettings) {
+                            AccountSettingsView()
+                                .environmentObject(accountSettingsViewModel)
+                                .environmentObject(authViewModel)
+                        }
+                        
+                        Button(action: {
+                            authViewModel.signOut()
+                        }) {
+                            Image(systemName: "power.circle.fill")
+                                .font(.title3)
+                                .foregroundColor(.red.opacity(0.8))
+                        }
+                    }
+                }
+            }
+            .onAppear {
+                rocksViewModel.fetchRocks()
             }
         }
+    }
+}
+
+struct RockCardView: View {
+    let rock: RockDto
+    let isFavorite: Bool
+    let onFavoriteToggle: () -> Void
+    
+    var body: some View {
+        HStack(spacing: 16) {
+            // Async Thumbnail Image
+            if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
+                AsyncImage(url: url) { phase in
+                    switch phase {
+                    case .empty:
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                            .frame(width: 80, height: 80)
+                            .background(Color("CoffeeBackground").opacity(0.3))
+                            .cornerRadius(12)
+                    case .success(let image):
+                        image
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 80, height: 80)
+                            .clipped()
+                            .cornerRadius(12)
+                    case .failure:
+                        Image(systemName: "photo")
+                            .font(.title)
+                            .foregroundColor(.white.opacity(0.6))
+                            .frame(width: 80, height: 80)
+                            .background(
+                                LinearGradient(
+                                    colors: [Color("ButtonDefault").opacity(0.6), Color("CoffeeBackground")],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .cornerRadius(12)
+                    @unknown default:
+                        Color.gray
+                            .frame(width: 80, height: 80)
+                            .cornerRadius(12)
+                    }
+                }
+                .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+            } else {
+                Image(systemName: "circle.grid.cross.fill")
+                    .font(.title)
+                    .foregroundColor(.white.opacity(0.6))
+                    .frame(width: 80, height: 80)
+                    .background(
+                        LinearGradient(
+                            colors: [Color("ButtonDefault").opacity(0.6), Color("CoffeeBackground")],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .cornerRadius(12)
+                    .shadow(color: Color.black.opacity(0.15), radius: 4, x: 0, y: 2)
+            }
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text(rock.title)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .foregroundColor(Color("DefaultTextColor"))
+                    .lineLimit(1)
+                
+                // Badges for Cut/ThinSection
+                HStack(spacing: 6) {
+                    if rock.cut == true {
+                        Text("Corte")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color("ButtonDefault").opacity(0.15))
+                            .foregroundColor(Color("ButtonDefault"))
+                            .cornerRadius(6)
+                    }
+                    if rock.thinSection == true {
+                        Text("Lámina")
+                            .font(.caption2)
+                            .fontWeight(.semibold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.blue.opacity(0.15))
+                            .foregroundColor(.blue)
+                            .cornerRadius(6)
+                    }
+                    
+                    if let locality = rock.locationName {
+                        Text(locality)
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            
+            Spacer()
+            
+            // Favorite Button
+            Button(action: onFavoriteToggle) {
+                Image(systemName: isFavorite ? "heart.fill" : "heart")
+                    .font(.title3)
+                    .foregroundColor(isFavorite ? .red : .gray.opacity(0.6))
+                    .scaleEffect(isFavorite ? 1.15 : 1.0)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isFavorite)
+                    .padding(8)
+                    .background(Color.white.opacity(0.08))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color("BoxBackground"))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.12), Color.clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+        )
     }
 }

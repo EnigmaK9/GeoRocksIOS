@@ -68,7 +68,7 @@ struct RockDto: Identifiable, Codable {
                 self.thumbnail = pic
             } else {
                 // Point to public asset Vite server of frontend workspace
-                self.thumbnail = "http://localhost:5173/\(pic)"
+                self.thumbnail = "http://192.168.1.64:5173/\(pic)"
             }
         } else {
             self.thumbnail = nil

@@ -17,102 +17,109 @@ struct FavoritesView: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                // Title for the Favorites section
-                Text("Your Favorite Rocks")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("DefaultTextColor"))
-                    .padding(.top, 20)
+            ZStack {
+                Color("BackgroundColor")
+                    .edgesIgnoringSafeArea(.all)
 
-                if rocksViewModel.favoriteRockIDs.isEmpty {
-                    // Message displayed when no favorites are selected
-                    Text("You have not added any rocks to your favorites yet.")
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding()
-                }
-                else {
-                    // List of favorite rocks is displayed
-                    List {
-                        ForEach(rocksViewModel.rocks.filter { rocksViewModel.isFavorite(rock: $0) }) { rock in
-                            NavigationLink(destination: RockDetailView(rockId: rock.id)) {
-                                HStack(spacing: 12) {
-                                    // Thumbnail image for the rock
-                                    if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
-                                        AsyncImage(url: url) { phase in
-                                            switch phase {
-                                            case .empty:
-                                                // Placeholder while the image is loading
-                                                Color.gray
-                                                    .frame(width: 50, height: 50)
-                                                    .overlay(
-                                                        ProgressView()
-                                                            .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
-                                                    )
-                                            case .success(let image):
-                                                // Successfully loaded image
-                                                image
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 50, height: 50)
-                                                    .clipped()
-                                            case .failure:
-                                                // Placeholder for failed image loading
-                                                Color.red
-                                                    .frame(width: 50, height: 50)
-                                                    .overlay(
-                                                        Image(systemName: "photo")
-                                                            .foregroundColor(.white)
-                                                    )
-                                            @unknown default:
-                                                // Fallback for any unknown cases
-                                                Color.gray
-                                                    .frame(width: 50, height: 50)
+                VStack {
+                    // Title for the Favorites section
+                    Text("Your Favorite Rocks")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("DefaultTextColor"))
+                        .padding(.top, 20)
+
+                    if rocksViewModel.favoriteRockIDs.isEmpty {
+                        // Message displayed when no favorites are selected
+                        Text("You have not added any rocks to your favorites yet.")
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding()
+                    }
+                    else {
+                        // List of favorite rocks is displayed
+                        List {
+                            ForEach(rocksViewModel.rocks.filter { rocksViewModel.isFavorite(rock: $0) }) { rock in
+                                NavigationLink(destination: RockDetailView(rockId: rock.id)) {
+                                    HStack(spacing: 12) {
+                                        // Thumbnail image for the rock
+                                        if let thumbnail = rock.thumbnail, let url = URL(string: thumbnail) {
+                                            AsyncImage(url: url) { phase in
+                                                switch phase {
+                                                case .empty:
+                                                    // Placeholder while the image is loading
+                                                    Color.gray
+                                                        .frame(width: 50, height: 50)
+                                                        .overlay(
+                                                            ProgressView()
+                                                                .progressViewStyle(CircularProgressViewStyle(tint: Color("ButtonDefault")))
+                                                        )
+                                                case .success(let image):
+                                                    // Successfully loaded image
+                                                    image
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 50, height: 50)
+                                                        .clipped()
+                                                case .failure:
+                                                    // Placeholder for failed image loading
+                                                    Color.red
+                                                        .frame(width: 50, height: 50)
+                                                        .overlay(
+                                                            Image(systemName: "photo")
+                                                                .foregroundColor(.white)
+                                                        )
+                                                @unknown default:
+                                                    // Fallback for any unknown cases
+                                                    Color.gray
+                                                        .frame(width: 50, height: 50)
+                                                }
                                             }
-                                        }
-                                        .cornerRadius(8)
-                                        .shadow(radius: 3)
-                                    } else {
-                                        // Placeholder for missing image
-                                        Color.gray
-                                            .frame(width: 50, height: 50)
                                             .cornerRadius(8)
                                             .shadow(radius: 3)
+                                        } else {
+                                            // Placeholder for missing image
+                                            Color.gray
+                                                .frame(width: 50, height: 50)
+                                                .cornerRadius(8)
+                                                .shadow(radius: 3)
+                                        }
+
+                                        // Rock title with improved typography
+                                        Text(rock.title)
+                                            .font(.headline)
+                                            .foregroundColor(Color("DefaultTextColor"))
+                                            .lineLimit(1)
+
+                                        Spacer()
+
+                                        // Unfavorite button to remove the rock from favorites
+                                        Button(action: {
+                                            rocksViewModel.toggleFavorite(rock: rock)
+                                        }) {
+                                            Image(systemName: "heart.fill")
+                                                .foregroundColor(.red)
+                                        }
+                                        .buttonStyle(BorderlessButtonStyle())
                                     }
-
-                                    // Rock title with improved typography
-                                    Text(rock.title)
-                                        .font(.headline)
-                                        .foregroundColor(Color("DefaultTextColor"))
-                                        .lineLimit(1)
-
-                                    Spacer()
-
-                                    // Unfavorite button to remove the rock from favorites
-                                    Button(action: {
-                                        rocksViewModel.toggleFavorite(rock: rock)
-                                    }) {
-                                        Image(systemName: "heart.fill")
-                                            .foregroundColor(.red)
-                                    }
-                                    .buttonStyle(BorderlessButtonStyle())
+                                    .padding(.vertical, 6)
+                                    .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
+                                    .shadow(radius: 3)
+                                    .padding(.horizontal)
                                 }
-                                .padding(.vertical, 6)
-                                .background(RoundedRectangle(cornerRadius: 10).fill(Color("BoxBackground")))
-                                .shadow(radius: 3)
-                                .padding(.horizontal)
                             }
                         }
+                        .listStyle(PlainListStyle())
+                        .scrollContentBackground(.hidden)
+                        .background(Color("BackgroundColor"))
                     }
-                    .listStyle(PlainListStyle())
-                    .background(Color("BackgroundColor"))
-                }
 
-                Spacer()
+                    Spacer()
+                }
             }
-            .background(Color("BackgroundColor").edgesIgnoringSafeArea(.all))
             .navigationTitle("Favorites")
+            .toolbarBackground(Color("BackgroundColor"), for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
         }
     }
 }
