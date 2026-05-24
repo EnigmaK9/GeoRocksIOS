@@ -42,9 +42,9 @@ class NetworkingService {
     /// - Parameter completion: Completion handler with Result containing an array of RockDto or an Error.
     func fetchRockList(completion: @escaping (Result<[RockDto], Error>) -> Void) {
         // Updated Base URL to match local FastAPI server
-        guard let url = URL(string: "http://localhost:8003/samples/") else {
+        guard let url = URL(string: "http://192.168.1.64:8003/samples/") else {
             completion(.failure(NetworkingError.invalidURL))
-            print("Invalid URL: http://localhost:8003/samples/")
+            print("Invalid URL: http://192.168.1.64:8003/samples/")
             return
         }
         
@@ -99,7 +99,7 @@ class NetworkingService {
     ///   - completion: Completion handler with Result containing RockDetailDto or an Error.
     func fetchRockDetail(rockId: String, completion: @escaping (Result<RockDetailDto, Error>) -> Void) {
         // Updated Base URL to match local FastAPI server
-        let urlString = "http://localhost:8003/samples/\(rockId)"
+        let urlString = "http://192.168.1.64:8003/samples/\(rockId)"
         guard let url = URL(string: urlString) else {
             completion(.failure(NetworkingError.invalidURL))
             print("Invalid URL: \(urlString)")

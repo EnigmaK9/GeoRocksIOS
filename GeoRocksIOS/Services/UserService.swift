@@ -11,7 +11,7 @@ protocol UserServiceProtocol {
     // The deleteAccount method has been removed as per user request.
 }
 
-// Implementation of UserServiceProtocol.
+// Implementation of UserServiceProtocol. 
 class UserService: UserServiceProtocol {
     static let shared = UserService()
     

@@ -58,7 +58,7 @@ struct RockDto: Identifiable, Codable {
             self.id = try container.decode(String.self, forKey: .origId)
         }
         
-        self.title = (try? container.decode(String.self, forKey: .title)) ?? (try container.decode(String.self, forKey: .origTitle))
+        self.title = try (try? container.decode(String.self, forKey: .title)) ?? container.decode(String.self, forKey: .origTitle)
         
         self.shortDescription = (try? container.decodeIfPresent(String.self, forKey: .shortDescription)) ?? (try? container.decodeIfPresent(String.self, forKey: .shortDescription))
         

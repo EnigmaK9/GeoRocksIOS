@@ -204,6 +204,7 @@
 				34F04D112D1945BD00797395 /* RockDto.swift */,
 				34F04D132D1945C800797395 /* RockDetailDto.swift */,
 				342963E12D2FA62800272463 /* UserProfile.swift */,
+				34F04D232D19462F00797395 /* RockDetailViewModel.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -213,7 +214,6 @@
 			children = (
 				34F04D1F2D19461500797395 /* AuthViewModel.swift */,
 				34F04D212D19462700797395 /* RocksViewModel.swift */,
-				34F04D232D19462F00797395 /* RockDetailViewModel.swift */,
 				342963E52D2FA65600272463 /* SettingsViewModel.swift */,
 				342963E72D2FA6EF00272463 /* AppearanceSettingsViewModel.swift */,
 				342963E92D2FA91300272463 /* AccountSettingsViewModel.swift */,
@@ -337,7 +337,7 @@
 				34FC65262D192061003CDF70 /* Sources */,
 				34FC65272D192061003CDF70 /* Frameworks */,
 				34FC65282D192061003CDF70 /* Resources */,
-				838106F4B015F3BBA897A218 /* [CP] Embed Pods Frameworks */,
+				5986C8611CAF2FDF7869D091 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -483,21 +483,25 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		838106F4B015F3BBA897A218 /* [CP] Embed Pods Frameworks */ = {
+		5986C8611CAF2FDF7869D091 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+				"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-GeoRocksIOS/Pods-GeoRocksIOS-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -723,6 +727,7 @@
 				INFOPLIST_FILE = GeoRocksIOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GeoRocks;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to allow you to select a rock image.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -733,7 +738,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -749,6 +754,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"GeoRocksIOS/Preview Content\"";
@@ -760,6 +766,7 @@
 				INFOPLIST_FILE = GeoRocksIOS/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = GeoRocks;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.education";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app requires access to your photo library to allow you to select a rock image.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -770,8 +777,9 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOS;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -789,7 +797,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOSTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -809,7 +817,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOSTests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS.Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -827,7 +835,7 @@
 				DEVELOPMENT_TEAM = 5U753FXZ82;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOSUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS.UITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
@@ -845,7 +853,7 @@
 				DEVELOPMENT_TEAM = 5U753FXZ82;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.GeoRocksIOSUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = org.enigma.B73Dragon.GeoRocksIOS.UITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;

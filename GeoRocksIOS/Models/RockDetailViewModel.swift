@@ -25,7 +25,7 @@ class RockDetailViewModel: ObservableObject {
     // A function is used to fetch the details of a specific rock by its ID.
     func fetchRockDetail(rockId: String) {
         // The URL is constructed using the specified rockId.
-        let urlString = "http://localhost:8003/samples/\(rockId)"
+        let urlString = "http://192.168.1.64:8003/samples/\(rockId)"
         
         // A check is done to ensure the URL is valid.
         guard let url = URL(string: urlString) else {
