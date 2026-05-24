@@ -85,6 +85,111 @@
             case chemicalProperties = "chemical_properties"
         }
         
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            // Define keys for backend SampleResponseModel
+            struct BackendKeys: CodingKey {
+                var stringValue: String
+                init?(stringValue: String) { self.stringValue = stringValue }
+                var intValue: Int? { return nil }
+                init?(intValue: Int) { return nil }
+                
+                static let rockName = BackendKeys(stringValue: "rock_name")!
+                static let rockDescription = BackendKeys(stringValue: "rock_description")!
+                static let picture = BackendKeys(stringValue: "picture")!
+                static let cut = BackendKeys(stringValue: "cut")!
+                static let thinSection = BackendKeys(stringValue: "thin_section")!
+                static let locationName = BackendKeys(stringValue: "location_name")!
+                static let locationCountry = BackendKeys(stringValue: "location_country")!
+            }
+            
+            let backendContainer = try? decoder.container(keyedBy: BackendKeys.self)
+            
+            // Title
+            if let titleVal = try? container.decodeIfPresent(String.self, forKey: .title) {
+                self.title = titleVal
+            } else if let rockName = try? backendContainer?.decodeIfPresent(String.self, forKey: .rockName) {
+                self.title = rockName
+            } else {
+                self.title = nil
+            }
+            
+            // Image
+            if let imageVal = try? container.decodeIfPresent(String.self, forKey: .image) {
+                if imageVal.hasPrefix("http") || imageVal == "Sin muestra" {
+                    self.image = imageVal == "Sin muestra" ? nil : imageVal
+                } else {
+                    self.image = "http://localhost:5173/\(imageVal)"
+                }
+            } else if let pic = try? backendContainer?.decodeIfPresent(String.self, forKey: .picture), pic != "Sin muestra", !pic.isEmpty {
+                if pic.hasPrefix("http") {
+                    self.image = pic
+                } else {
+                    self.image = "http://localhost:5173/\(pic)"
+                }
+            } else {
+                self.image = nil
+            }
+            
+            // Video
+            self.video = try? container.decodeIfPresent(String.self, forKey: .video)
+            
+            // Long description
+            if let longDescVal = try? container.decodeIfPresent(String.self, forKey: .longDesc) {
+                self.longDesc = longDescVal
+            } else if let desc = try? backendContainer?.decodeIfPresent(String.self, forKey: .rockDescription) {
+                self.longDesc = desc
+            } else {
+                self.longDesc = nil
+            }
+            
+            // aMemberOf / Type
+            if let member = try? container.decodeIfPresent(String.self, forKey: .aMemberOf) {
+                self.aMemberOf = member
+            } else if backendContainer != nil {
+                self.aMemberOf = "Specimen Sample"
+            } else {
+                self.aMemberOf = nil
+            }
+            
+            // Localities
+            if let local = try? container.decodeIfPresent([String].self, forKey: .localities) {
+                self.localities = local
+            } else if let locName = try? backendContainer?.decodeIfPresent(String.self, forKey: .locationName),
+                      let locCountry = try? backendContainer?.decodeIfPresent(String.self, forKey: .locationCountry) {
+                self.localities = ["\(locName), \(locCountry)"]
+            } else {
+                self.localities = nil
+            }
+            
+            // alsoKnownAs
+            if let also = try? container.decodeIfPresent([String].self, forKey: .alsoKnownAs) {
+                self.alsoKnownAs = also
+            } else if let cut = try? backendContainer?.decodeIfPresent(Bool.self, forKey: .cut),
+                      let thin = try? backendContainer?.decodeIfPresent(Bool.self, forKey: .thinSection) {
+                self.alsoKnownAs = [
+                    "Corte físico: \(cut ? "Sí" : "No")",
+                    "Lámina delgada: \(thin ? "Sí" : "No")"
+                ]
+            } else {
+                self.alsoKnownAs = nil
+            }
+            
+            // Other optional attributes
+            self.formula = try? container.decodeIfPresent(String.self, forKey: .formula)
+            self.hardness = try? container.decodeIfPresent(Int.self, forKey: .hardness)
+            self.color = try? container.decodeIfPresent(String.self, forKey: .color)
+            self.magnetic = try? container.decodeIfPresent(Bool.self, forKey: .magnetic)
+            self.latitude = try? container.decodeIfPresent(Double.self, forKey: .latitude)
+            self.longitude = try? container.decodeIfPresent(Double.self, forKey: .longitude)
+            self.healthRisks = try? container.decodeIfPresent(String.self, forKey: .healthRisks)
+            self.images = try? container.decodeIfPresent([String].self, forKey: .images)
+            self.frequentlyAskedQuestions = try? container.decodeIfPresent([String].self, forKey: .frequentlyAskedQuestions)
+            self.physicalProperties = try? container.decodeIfPresent(PhysicalProperties.self, forKey: .physicalProperties)
+            self.chemicalProperties = try? container.decodeIfPresent(ChemicalProperties.self, forKey: .chemicalProperties)
+        }
+        
         // MARK: - PhysicalProperties
         struct PhysicalProperties: Decodable {
             // The crystal system of the rock is stored

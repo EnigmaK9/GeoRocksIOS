@@ -8,5 +8,10 @@
 	<string>This app requires access to your photo library to allow you to select a rock image.</string>
 	<key>Test_API</key>
 	<string></string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

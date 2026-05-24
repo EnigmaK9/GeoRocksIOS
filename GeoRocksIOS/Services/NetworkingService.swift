@@ -41,10 +41,10 @@ class NetworkingService {
     /// Fetches the list of rocks from the backend.
     /// - Parameter completion: Completion handler with Result containing an array of RockDto or an Error.
     func fetchRockList(completion: @escaping (Result<[RockDto], Error>) -> Void) {
-        // Updated Base URL to match Apiary mock server
-        guard let url = URL(string: "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_list") else {
+        // Updated Base URL to match local FastAPI server
+        guard let url = URL(string: "http://localhost:8003/samples/") else {
             completion(.failure(NetworkingError.invalidURL))
-            print("Invalid URL: https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_list")
+            print("Invalid URL: http://localhost:8003/samples/")
             return
         }
         
@@ -98,8 +98,8 @@ class NetworkingService {
     ///   - rockId: The unique identifier of the rock.
     ///   - completion: Completion handler with Result containing RockDetailDto or an Error.
     func fetchRockDetail(rockId: String, completion: @escaping (Result<RockDetailDto, Error>) -> Void) {
-        // Updated Base URL to match Apiary mock server
-        let urlString = "https://private-516480-rock9tastic.apiary-mock.com/rocks/rock_detail/\(rockId)"
+        // Updated Base URL to match local FastAPI server
+        let urlString = "http://localhost:8003/samples/\(rockId)"
         guard let url = URL(string: urlString) else {
             completion(.failure(NetworkingError.invalidURL))
             print("Invalid URL: \(urlString)")
