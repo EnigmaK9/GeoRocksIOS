@@ -13,6 +13,9 @@
 import SwiftUI
 
 struct AccountSettingsView: View {
+    @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.presentationMode) var presentationMode
+    
     @State private var notificationsEnabled = true
     @State private var emailNotifications = false
     @State private var smsNotifications = false
@@ -24,30 +27,20 @@ struct AccountSettingsView: View {
                 // Profile Section
                 Section(header: Text("Profile")) {
                     HStack(spacing: 16) {
-                        Image("profile_placeholder")
+                        Image(systemName: "person.crop.circle.fill")
                             .resizable()
-                            .scaledToFill()
+                            .scaledToFit()
                             .frame(width: 70, height: 70)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle().stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                            )
-                            .shadow(radius: 3)
+                            .foregroundColor(.gray)
                         
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Carlos Padilla")
+                            Text(authViewModel.userEmail?.components(separatedBy: "@").first?.capitalized ?? "Administrador")
                                 .font(.headline)
-                            Text("carlos.padilla@example.com")
+                            Text(authViewModel.userEmail ?? "admin@unam.mx")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
                         Spacer()
-                    }
-                    Button(action: {
-                        // Action for editing profile
-                    }) {
-                        Text("Edit Profile")
-                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
                 
@@ -109,7 +102,8 @@ struct AccountSettingsView: View {
                 // Logout Button
                 Section {
                     Button(action: {
-                        // Action for logging out
+                        authViewModel.signOut()
+                        presentationMode.wrappedValue.dismiss()
                     }) {
                         HStack {
                             Spacer()
@@ -128,5 +122,6 @@ struct AccountSettingsView: View {
 struct AccountSettingsView_Previews: PreviewProvider {
     static var previews: some View {
         AccountSettingsView()
+            .environmentObject(AuthViewModel())
     }
 }

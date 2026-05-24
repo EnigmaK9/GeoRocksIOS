@@ -5,11 +5,10 @@
  //  Created by Carlos Ignacio Padilla Herrera on 12/12/24.
  //
  //  Description:
- //  The AuthViewModel manages user authentication state and related actions.
+ //  The AuthViewModel manages user authentication state and related actions using custom JWT on the FastAPI backend.
  //
  
  import SwiftUI
- import FirebaseAuth
  
  class AuthViewModel: ObservableObject {
      // A published property to track the user's login status
@@ -19,95 +18,177 @@
      @Published var errorMessage: String?
      @Published var successMessage: String?
      
-     // Listener handle to manage the authentication state listener
-     private var authListenerHandle: AuthStateDidChangeListenerHandle?
+     // Dynamic profile user email
+     @Published var userEmail: String? = nil
      
      init() {
-         // Check if a user is already authenticated at the app's launch
-         self.isLoggedIn = Auth.auth().currentUser != nil
-         
-         // Authentication state changes are being listened to
-         authListenerHandle = Auth.auth().addStateDidChangeListener { [weak self] _, user in
-             DispatchQueue.main.async {
-                 // The login status is updated based on the user's authentication state
-                 self?.isLoggedIn = user != nil
-             }
+         // Check if a user has a stored token and verify it
+         if NetworkingService.shared.getToken() != nil {
+             self.isLoggedIn = true
+             verifyTokenAndLogin()
+         } else {
+             self.isLoggedIn = false
          }
      }
      
-     deinit {
-         // Remove the authentication state listener when the ViewModel is deinitialized
-         if let handle = authListenerHandle {
-             Auth.auth().removeStateDidChangeListener(handle)
+     // MARK: - Verify Stored Token
+     func verifyTokenAndLogin() {
+         guard let token = NetworkingService.shared.getToken() else {
+             self.isLoggedIn = false
+             return
          }
+         
+         guard let url = URL(string: "http://192.168.1.64:8003/auth/me") else {
+             self.isLoggedIn = false
+             return
+         }
+         
+         var request = URLRequest(url: url)
+         request.httpMethod = "GET"
+         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+         
+         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+             DispatchQueue.main.async {
+                 if error != nil {
+                     NetworkingService.shared.clearToken()
+                     self?.userEmail = nil
+                     self?.isLoggedIn = false
+                     return
+                 }
+                 
+                 if let httpResponse = response as? HTTPURLResponse, (200...299).contains(httpResponse.statusCode) {
+                     self?.isLoggedIn = true
+                     if let data = data,
+                        let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                         let email = json["email"] as? String ?? json["username"] as? String ?? "admin@unam.mx"
+                         self?.userEmail = email
+                     }
+                 } else {
+                     NetworkingService.shared.clearToken()
+                     self?.userEmail = nil
+                     self?.isLoggedIn = false
+                 }
+             }
+         }
+         task.resume()
      }
      
      // MARK: - Sign In with Email/Password
      func signIn(email: String, password: String) {
-         // A sign-in attempt is made using the provided email and password
-         Auth.auth().signIn(withEmail: email, password: password) { [weak self] _, error in
+         guard let url = URL(string: "http://192.168.1.64:8003/auth/token") else {
+             self.errorMessage = "URL de servidor inválida."
+             return
+         }
+         
+         var request = URLRequest(url: url)
+         request.httpMethod = "POST"
+         request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+         
+         let bodyString = "username=\(email.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")&password=\(password.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")"
+         request.httpBody = bodyString.data(using: .utf8)
+         
+         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
              DispatchQueue.main.async {
                  if let error = error {
-                     // Set the error message to be displayed
                      self?.errorMessage = error.localizedDescription
-                     print("Error signing in: \(error.localizedDescription)")
-                 } else {
-                     // If the sign-in is successful, the login status is marked as true
-                     self?.isLoggedIn = true
+                     return
+                 }
+                 
+                 guard let data = data else {
+                     self?.errorMessage = "No se recibieron datos del servidor backend."
+                     return
+                 }
+                 
+                 if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                     if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                        let detail = errorJson["detail"] as? String {
+                         self?.errorMessage = detail
+                     } else {
+                         self?.errorMessage = "Credenciales incorrectas o error en el servidor (\(httpResponse.statusCode))."
+                     }
+                     return
+                 }
+                 
+                 do {
+                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                        let token = json["access_token"] as? String {
+                         NetworkingService.shared.saveToken(token)
+                         self?.isLoggedIn = true
+                         self?.errorMessage = nil
+                     } else {
+                         self?.errorMessage = "Respuesta de autenticación inválida del servidor."
+                     }
+                 } catch {
+                     self?.errorMessage = "Error al procesar la respuesta del servidor: \(error.localizedDescription)"
                  }
              }
          }
+         task.resume()
      }
      
      // MARK: - Register (Create Account)
      func register(email: String, password: String) {
-         // An account creation attempt is made using the provided email and password
-         Auth.auth().createUser(withEmail: email, password: password) { [weak self] _, error in
+         guard let url = URL(string: "http://192.168.1.64:8003/auth/signup") else {
+             self.errorMessage = "URL de registro inválida."
+             return
+         }
+         
+         var request = URLRequest(url: url)
+         request.httpMethod = "POST"
+         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+         
+         let body: [String: Any] = [
+             "email": email,
+             "password": password,
+             "username": email
+         ]
+         
+         guard let httpBody = try? JSONSerialization.data(withJSONObject: body) else {
+             self.errorMessage = "Error al construir la petición de registro."
+             return
+         }
+         request.httpBody = httpBody
+         
+         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
              DispatchQueue.main.async {
                  if let error = error {
-                     // Set the error message to be displayed
                      self?.errorMessage = error.localizedDescription
-                     print("Error registering: \(error.localizedDescription)")
-                 } else {
-                     // If the registration is successful, the login status is marked as true
-                     self?.isLoggedIn = true
-                     // Optionally, set a success message
-                     self?.successMessage = "Account created successfully!"
+                     return
                  }
+                 
+                 guard let data = data else {
+                     self?.errorMessage = "No se recibieron datos de confirmación del servidor."
+                     return
+                 }
+                 
+                 if let httpResponse = response as? HTTPURLResponse, !(200...299).contains(httpResponse.statusCode) {
+                     if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                        let detail = errorJson["detail"] as? String {
+                         self?.errorMessage = detail
+                     } else {
+                         self?.errorMessage = "Error al registrar la cuenta de administrador (\(httpResponse.statusCode))."
+                     }
+                     return
+                 }
+                 
+                 // Register success! Log in automatically
+                 self?.signIn(email: email, password: password)
+                 self?.successMessage = "¡Cuenta creada exitosamente!"
              }
          }
+         task.resume()
      }
      
      // MARK: - Reset Password
      func resetPassword(email: String) {
-         // A password reset email is sent to the provided email address
-         Auth.auth().sendPasswordReset(withEmail: email) { [weak self] error in
-             DispatchQueue.main.async {
-                 if let error = error {
-                     // Set the error message to be displayed
-                     self?.errorMessage = error.localizedDescription
-                     print("Error sending password reset: \(error.localizedDescription)")
-                 } else {
-                     // Set a success message to inform the user
-                     self?.successMessage = "Password reset email sent to \(email)."
-                     print("Password reset email sent to \(email)")
-                 }
-             }
-         }
+         self.successMessage = "Por favor, contacte al administrador del sistema en la UNAM para restablecer la contraseña del usuario \(email)."
      }
      
      // MARK: - Sign Out
      func signOut() {
-         do {
-             // An attempt is made to sign out the current user
-             try Auth.auth().signOut()
-             // If the sign-out is successful, the login status is marked as false
-             self.isLoggedIn = false
-         } catch {
-             // Set the error message to be displayed
-             self.errorMessage = error.localizedDescription
-             print("Error signing out: \(error.localizedDescription)")
-         }
+         NetworkingService.shared.clearToken()
+         self.userEmail = nil
+         self.isLoggedIn = false
      }
      
      // MARK: - Clear Messages
@@ -119,12 +200,9 @@
      /// Checks the authentication status and updates the loading state accordingly.
      /// - Parameter completion: A closure that returns a boolean indicating authentication success.
      func checkAuthenticationStatus(completion: @escaping (Bool) -> Void) {
-         // The current user is retrieved from FirebaseAuth.
-         if Auth.auth().currentUser != nil {
-             // The user is authenticated.
+         if NetworkingService.shared.getToken() != nil {
              completion(true)
          } else {
-             // The user is not authenticated.
              completion(false)
          }
      }

@@ -35,6 +35,12 @@ struct ForgotPasswordView: View {
                     .fontWeight(.bold)
                     .foregroundColor(Color("DefaultTextColor"))
                 
+                Text("Si olvidó la contraseña de administrador de su base de datos local de FastAPI, introduzca su correo para ver las instrucciones de asistencia.")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                
                 VStack(spacing: 15) {
                     // Email Input
                     TextField("Enter your email", text: $email)

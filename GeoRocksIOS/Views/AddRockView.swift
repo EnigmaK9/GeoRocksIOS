@@ -13,6 +13,9 @@ import SwiftUI
 import PhotosUI // Add this line if it's not already present
 
 struct AddNewRockView: View {
+    @EnvironmentObject var rocksViewModel: RocksViewModel
+    @Environment(\.presentationMode) var presentationMode
+    
     @State private var rockName: String = ""
     @State private var rockType: String = ""
     @State private var locationFound: String = ""
@@ -23,6 +26,10 @@ struct AddNewRockView: View {
     @State private var inputImage: UIImage?
     @State private var isFavorite: Bool = false
     @State private var showAlert = false
+    
+    @State private var isSaving = false
+    @State private var saveErrorMessage: String? = nil
+    @State private var showSaveErrorAlert = false
     
     var body: some View {
         NavigationView {
@@ -54,13 +61,13 @@ struct AddNewRockView: View {
                 Section(header: Text("Photo")) {
                     if let rockImage = rockImage {
                         rockImage
-                            .resizable()
-                            .scaledToFit()
-                            .frame(height: 200)
-                            .cornerRadius(10)
-                            .onTapGesture {
-                                isShowingImagePicker = true
-                            }
+                             .resizable()
+                             .scaledToFit()
+                             .frame(height: 200)
+                             .cornerRadius(10)
+                             .onTapGesture {
+                                 isShowingImagePicker = true
+                             }
                     } else {
                         Button(action: {
                             isShowingImagePicker = true
@@ -87,12 +94,37 @@ struct AddNewRockView: View {
                         if rockName.isEmpty || rockType.isEmpty {
                             showAlert = true
                         } else {
-                            // Save the new rock
+                            isSaving = true
+                            NetworkingService.shared.createRockSample(
+                                name: rockName,
+                                description: description,
+                                location: locationFound
+                            ) { result in
+                                DispatchQueue.main.async {
+                                    isSaving = false
+                                    switch result {
+                                    case .success:
+                                        // Refresh the main catalog
+                                        rocksViewModel.fetchRocks()
+                                        // Dismiss the addition sheet
+                                        presentationMode.wrappedValue.dismiss()
+                                    case .failure(let error):
+                                        saveErrorMessage = error.localizedDescription
+                                        showSaveErrorAlert = true
+                                    }
+                                }
+                            }
                         }
                     }) {
-                        Text("Save Rock")
-                            .frame(maxWidth: .infinity, alignment: .center)
+                        if isSaving {
+                            ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        } else {
+                            Text("Save Rock")
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
                     }
+                    .disabled(isSaving)
                 }
             }
             .navigationTitle("Add New Rock")
@@ -103,6 +135,13 @@ struct AddNewRockView: View {
                 Alert(
                     title: Text("Incomplete Information"),
                     message: Text("Please fill in all required fields."),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .alert(isPresented: $showSaveErrorAlert) {
+                Alert(
+                    title: Text("Error al guardar"),
+                    message: Text(saveErrorMessage ?? "Ocurrió un error inesperado al registrar el espécimen."),
                     dismissButton: .default(Text("OK"))
                 )
             }
@@ -128,5 +167,6 @@ struct AddNewRockView: View {
 struct AddNewRockView_Previews: PreviewProvider {
     static var previews: some View {
         AddNewRockView()
+            .environmentObject(RocksViewModel())
     }
 }
